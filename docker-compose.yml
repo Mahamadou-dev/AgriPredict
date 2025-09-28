@@ -1,0 +1,68 @@
+
+
+services:
+  # Base de Données PostgreSQL
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: agri
+      POSTGRES_PASSWORD: agri123
+      POSTGRES_DB: agripredict
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - agripredict-network
+
+  # Outil d'Administration BDD
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mahamadou8877@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+    networks:
+      - agripredict-network
+
+  # Backend ASP.NET Core API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=agripredict;Username=agri;Password=agri123
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5000:80"
+    depends_on:
+      - postgres
+    networks:
+      - agripredict-network
+
+  # Frontend Next.js Admin Panel
+  frontend-admin:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+      # Cache Docker pour pnpm (accélère les rebuilds)
+      args:
+        - NODE_ENV=development
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:80
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - agripredict-network
+
+networks:
+  agripredict-network:
+    driver: bridge
+
+volumes:
+  pgdata:
