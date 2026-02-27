@@ -1,0 +1,45 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\GREMAHTECH\\GremahTech\\PFE\\AgriPredict\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EF928EB1-3404-8F51-5B25-863E3AC4B56B}|backend\\AgriPredict.API\\AgriPredict.API.csproj|c:\\gremahtech\\gremahtech\\pfe\\agripredict\\backend\\agripredict.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EF928EB1-3404-8F51-5B25-863E3AC4B56B}|backend\\AgriPredict.API\\AgriPredict.API.csproj|solutionrelative:backend\\agripredict.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\GREMAHTECH\\GremahTech\\PFE\\AgriPredict\\backend\\AgriPredict.API\\Program.cs",
+              "RelativeDocumentMoniker": "backend\\AgriPredict.API\\Program.cs",
+              "ToolTip": "C:\\GREMAHTECH\\GremahTech\\PFE\\AgriPredict\\backend\\AgriPredict.API\\Program.cs",
+              "RelativeToolTip": "backend\\AgriPredict.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T16:20:03.024Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
