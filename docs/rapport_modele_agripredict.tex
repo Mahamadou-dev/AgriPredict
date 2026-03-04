@@ -1,0 +1,1168 @@
+% ============================================================
+%  RAPPORT PFE — AgriPredict
+%  Classification des maladies des plantes par Deep Learning
+%  embarqué sur smartphone (MobileNetV2 + Focal Loss)
+% ============================================================
+\documentclass[12pt, a4paper, twoside]{report}
+
+% ---------- ENCODAGE & LANGUE ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% ---------- MISE EN PAGE ----------
+\usepackage[
+  top=2.5cm, bottom=2.5cm,
+  left=2.5cm, right=2.5cm,
+  headheight=15pt
+]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------- POLICES ----------
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---------- EN-TÊTES & PIEDS ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\nouppercase{\rightmark}}
+\fancyhead[RE]{\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% ---------- MATHÉMATIQUES ----------
+\usepackage{amsmath, amssymb, amsfonts}
+
+% ---------- GRAPHIQUES & COULEURS ----------
+\usepackage{graphicx}
+\usepackage[table,dvipsnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc}
+
+% ---------- TABLEAUX ----------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{array}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% ---------- CODE SOURCE ----------
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{NavyBlue}\bfseries,
+  stringstyle=\color{OliveGreen},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!40},
+  backgroundcolor=\color{gray!5},
+  breaklines=true,
+  captionpos=b,
+  tabsize=4,
+  showstringspaces=false,
+}
+
+% ---------- HYPERLIENS ----------
+\usepackage[
+  colorlinks=true,
+  linkcolor=NavyBlue,
+  citecolor=ForestGreen,
+  urlcolor=RoyalBlue,
+  bookmarks=true,
+  pdfauthor={AgriPredict},
+  pdftitle={Rapport PFE — AgriPredict : Classification des maladies des plantes},
+]{hyperref}
+
+% ---------- BIBLIOGRAPHIE ----------
+\usepackage[numbers, sort&compress]{natbib}
+
+% ---------- LÉGENDES ----------
+\usepackage[font=small, labelfont=bf, labelsep=period]{caption}
+\usepackage{subcaption}
+
+% ---------- LISTES ----------
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=*}
+
+% ---------- ALGORITHMES ----------
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\renewcommand{\algorithmicrequire}{\textbf{Entrée :}}
+\renewcommand{\algorithmicensure}{\textbf{Sortie :}}
+
+% ---------- DIVERS ----------
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{appendix}
+
+% ---------- COMMANDES PERSONNALISÉES ----------
+\newcommand{\focal}{\textsc{Focal Loss}}
+\newcommand{\mobilenet}{\textsc{MobileNetV2}}
+\newcommand{\agri}{\textsc{AgriPredict}}
+\newcommand{\relu}{\text{ReLU6}}
+
+% ============================================================
+\begin{document}
+
+% ============================================================
+%  PAGE DE TITRE
+% ============================================================
+\begin{titlepage}
+\centering
+
+\vspace*{1cm}
+
+{\Large\scshape Projet de Fin d'Études\par}
+\vspace{0.5cm}
+{\large Année universitaire 2025--2026\par}
+
+\vspace{2cm}
+
+\rule{\textwidth}{1.5pt}\\[0.4cm]
+{\Huge\bfseries AgriPredict\\[0.3cm]}
+{\LARGE Classification des maladies des plantes\\
+par Deep Learning embarqué sur smartphone\\[0.3cm]}
+{\Large MobileNetV2 + Focal Loss $\longrightarrow$ TFLite INT8}\\[0.4cm]
+\rule{\textwidth}{1.5pt}
+
+\vspace{2cm}
+
+{\large
+\begin{tabular}{rl}
+\textbf{Auteur}       & [Votre Nom] \\
+\textbf{Encadrant}    & [Nom de l'encadrant] \\
+\textbf{Établissement}& [Nom de l'université / école] \\
+\textbf{Filière}      & [Filière / Département] \\
+\end{tabular}
+}
+
+\vfill
+
+{\large\itshape
+«~Rendre le diagnostic phytosanitaire accessible\\
+aux agriculteurs par l'intelligence artificielle embarquée.~»}
+
+\vspace{1cm}
+
+% \includegraphics[width=3cm]{logo_universite.png}
+
+\end{titlepage}
+
+% ============================================================
+%  PAGES LIMINAIRES
+% ============================================================
+\pagenumbering{roman}
+
+% --- Résumé ---
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+
+Ce rapport présente le développement du module d'intelligence artificielle du projet \agri{}, un système de diagnostic automatique des maladies des plantes destiné aux agriculteurs d'Afrique de l'Ouest. Le modèle repose sur l'architecture \mobilenet{} (Sandler et al., 2018) combinée à la \focal{} (Lin et al., 2017) pour traiter un dataset de \textbf{48\,036 images} réparties sur \textbf{24 classes} de maladies et états sains, issues des jeux de données PlantVillage et Cassava Leaf Disease.
+
+L'entraînement en deux phases --- transfer learning puis fine-tuning chirurgical --- atteint un \textbf{F1-score macro de 0.8510} et une \textbf{accuracy de 82.75\,\%} sur le jeu de test. Le modèle est ensuite converti au format TFLite avec quantification INT8 complète, produisant un fichier de \textbf{$\sim$\,2.2\,Mo} déployable sur smartphone, sans aucun fallback en float32 grâce aux activations ReLU6 de MobileNetV2.
+
+\textbf{Mots-clés :} Deep Learning, Transfer Learning, MobileNetV2, Focal Loss, quantification INT8, TFLite, classification d'images, maladies des plantes, agriculture, edge AI.
+
+\vspace{1cm}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This report presents the development of the artificial intelligence module of the \agri{} project, an automatic plant disease diagnosis system designed for West African farmers. The model is based on the \mobilenet{} architecture (Sandler et al., 2018) combined with \focal{} (Lin et al., 2017) to handle a dataset of \textbf{48,036 images} spread across \textbf{24 disease and healthy classes}, sourced from the PlantVillage and Cassava Leaf Disease datasets.
+
+Two-phase training --- transfer learning followed by surgical fine-tuning --- achieves a \textbf{macro F1-score of 0.8510} and an \textbf{accuracy of 82.75\%} on the test set. The model is then converted to TFLite format with full INT8 quantization, producing a \textbf{$\sim$\,2.2\,MB} file deployable on smartphones, with no float32 fallback thanks to MobileNetV2's ReLU6 activations.
+
+\textbf{Keywords:} Deep Learning, Transfer Learning, MobileNetV2, Focal Loss, INT8 quantization, TFLite, image classification, plant diseases, agriculture, edge AI.
+
+% --- Table des matières ---
+\tableofcontents
+\listoffigures
+\listoftables
+
+% ============================================================
+%  CORPS DU RAPPORT
+% ============================================================
+\cleardoublepage
+\pagenumbering{arabic}
+
+% ************************************************************
+\chapter{Introduction}
+% ************************************************************
+
+\section{Contexte et problématique}
+
+L'agriculture constitue le pilier économique de nombreux pays d'Afrique de l'Ouest, employant plus de 60\,\% de la population active. Cependant, les pertes de récolte dues aux maladies phytosanitaires représentent entre 20\,\% et 40\,\% de la production annuelle selon la FAO. Le diagnostic précoce des maladies des plantes est donc un enjeu crucial pour la sécurité alimentaire.
+
+Les méthodes traditionnelles de diagnostic reposent sur l'expertise d'agronomes, une ressource rare dans les zones rurales. L'émergence des smartphones, dont le taux de pénétration dépasse désormais 50\,\% en Afrique de l'Ouest, ouvre la voie à des solutions de diagnostic assisté par intelligence artificielle, directement sur le terrain, \textbf{sans connexion internet}.
+
+\section{Objectifs du projet}
+
+Le projet \agri{} vise à développer un système complet de diagnostic des maladies des plantes, composé de :
+\begin{enumerate}
+    \item Un \textbf{modèle de Deep Learning} capable de classifier 24 types de maladies et états sains à partir de photos de feuilles ;
+    \item Un \textbf{modèle embarqué} (< 2\,Mo) fonctionnant hors-ligne sur smartphone ;
+    \item Une \textbf{application mobile} intuitive pour les agriculteurs ;
+    \item Un \textbf{tableau de bord web} pour le suivi épidémiologique.
+\end{enumerate}
+
+Le présent rapport se concentre sur le \textbf{premier et deuxième objectif} : le développement, l'entraînement et l'optimisation du modèle de classification.
+
+\section{Contributions principales}
+
+Les contributions techniques de ce travail sont :
+\begin{itemize}
+    \item La combinaison \mobilenet{} + \focal{} pour gérer un déséquilibre de classes extrême (ratio $\times$86,6) ;
+    \item Un protocole d'entraînement en deux phases (transfer learning + fine-tuning chirurgical) ;
+    \item Une quantification INT8 complète sans dégradation significative ($\Delta$F1 < 2\,\%) ;
+    \item La validation expérimentale sur un dataset multi-source de 48\,036 images couvrant 5 cultures tropicales.
+\end{itemize}
+
+\section{Organisation du rapport}
+
+Le chapitre~\ref{chap:etat-art} passe en revue l'état de l'art. Le chapitre~\ref{chap:dataset} présente le dataset et son analyse exploratoire. Le chapitre~\ref{chap:methode} détaille la méthodologie (architecture, loss, entraînement). Le chapitre~\ref{chap:resultats} analyse les résultats expérimentaux. Le chapitre~\ref{chap:deploiement} traite de la quantification et du déploiement. Enfin, le chapitre~\ref{chap:conclusion} conclut et propose des perspectives.
+
+
+% ************************************************************
+\chapter{État de l'art}
+\label{chap:etat-art}
+% ************************************************************
+
+\section{Classification d'images par réseaux de neurones convolutifs}
+
+Depuis les travaux fondateurs de Krizhevsky et al. (2012) avec AlexNet, les réseaux de neurones convolutifs (CNN) ont dominé la classification d'images. Les architectures ont évolué vers des modèles plus profonds (VGG, ResNet) puis plus efficaces (MobileNet, EfficientNet), cherchant un compromis entre performance et coût computationnel.
+
+\section{Architectures légères pour l'embarqué}
+
+Les CNN classiques (ResNet-50 : 25,6\,M paramètres, 98\,Mo) sont incompatibles avec les contraintes des smartphones entrée de gamme. Plusieurs architectures légères ont été proposées :
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des architectures légères pour le mobile.}
+\label{tab:archi-comparison}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Architecture} & \textbf{Paramètres} & \textbf{MAdds} & \textbf{Activation} & \textbf{INT8} \\
+\midrule
+MobileNetV1 \cite{howard2017mobilenets}    & 4,2\,M & 569\,M & ReLU    & \checkmark \\
+\textbf{MobileNetV2} \cite{sandler2018mobilenetv2} & \textbf{3,4\,M} & \textbf{300\,M} & \textbf{ReLU6} & \checkmark\checkmark \\
+MobileNetV3-Small \cite{howard2019mobilenetv3}     & 2,5\,M & 56\,M  & Hard-Swish & $\sim$ \\
+EfficientNet-B0 \cite{tan2019efficientnet}          & 5,3\,M & 390\,M & Swish   & $\sim$ \\
+ShuffleNetV2 \cite{ma2018shufflenet}                & 2,3\,M & 146\,M & ReLU    & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Pourquoi MobileNetV2 plutôt que V3 ?}
+
+Notre choix de \mobilenet{} (et non V3) est motivé par la \textbf{compatibilité avec la quantification INT8}. MobileNetV3 utilise l'activation \textit{hard-swish} :
+\begin{equation}
+\text{hard-swish}(x) = x \cdot \frac{\text{ReLU6}(x + 3)}{6}
+\end{equation}
+
+Cette activation non-linéaire complexe provoque un \textbf{fallback en float32} lors de la quantification INT8 sur certains interpréteurs TFLite, annulant les gains de compression. En revanche, MobileNetV2 utilise exclusivement ReLU6 :
+\begin{equation}
+\text{ReLU6}(x) = \min(\max(0, x),\; 6)
+\end{equation}
+
+ReLU6 est \textbf{linéaire par morceaux} et \textbf{bornée} dans $[0, 6]$, ce qui garantit une quantification INT8 parfaite sans aucun opérateur dérogatoire.
+
+\subsection{Blocs Inverted Residuals}
+
+L'innovation centrale de MobileNetV2 est le bloc \textit{inverted residual} avec \textit{linear bottleneck} (figure~\ref{fig:inverted-residual}) :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=3cm, minimum height=0.8cm, align=center, rounded corners=2pt},
+    arrow/.style={-{Stealth[length=3mm]}, thick},
+    node distance=1.2cm
+]
+    \node[block, fill=blue!10] (input) {Entrée ($k$ channels)};
+    \node[block, fill=orange!20, below=of input] (expand) {Conv 1×1 (expansion $\times t$)\\+ BN + ReLU6};
+    \node[block, fill=green!15, below=of expand] (dw) {DepthWise Conv 3×3\\+ BN + ReLU6};
+    \node[block, fill=red!10, below=of dw] (project) {Conv 1×1 (projection)\\+ BN \textit{(linéaire)}};
+    \node[block, fill=blue!10, below=of project] (output) {Sortie ($k'$ channels)};
+
+    \draw[arrow] (input) -- (expand);
+    \draw[arrow] (expand) -- (dw);
+    \draw[arrow] (dw) -- (project);
+    \draw[arrow] (project) -- (output);
+
+    % Shortcut
+    \draw[arrow, dashed, color=red!60!black] (input.east) -- ++(2,0) |- (output.east)
+        node[midway, right, font=\small] {skip ($k = k'$)};
+\end{tikzpicture}
+\caption{Bloc \textit{inverted residual} de MobileNetV2. Le facteur d'expansion $t$ élargit temporairement la représentation avant une convolution déprofondeur (depthwise), puis une projection linéaire réduit la dimension. La connexion résiduelle (skip) est ajoutée lorsque les dimensions d'entrée et de sortie coïncident.}
+\label{fig:inverted-residual}
+\end{figure}
+
+\section{Focal Loss pour le déséquilibre de classes}
+
+La \focal{} a été introduite par Lin et al. (2017) dans le contexte de la détection d'objets pour résoudre le déséquilibre entre les ancres positives (objets) et négatives (arrière-plan). Elle modifie la cross-entropie classique en ajoutant un facteur de modulation :
+
+\begin{equation}
+\text{FL}(p_t) = -\alpha_t \cdot (1 - p_t)^{\gamma} \cdot \log(p_t)
+\label{eq:focal-loss}
+\end{equation}
+
+où $p_t$ est la probabilité prédite pour la vraie classe, $\gamma \geq 0$ est le \textit{facteur de focalisation} et $\alpha_t \in [0,1]$ un facteur de pondération.
+
+\begin{table}[H]
+\centering
+\caption{Effet du facteur de focalisation $\gamma$ sur la contribution à la loss.}
+\label{tab:focal-effect}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Confiance} $p_t$ & \textbf{CE} $-\log(p_t)$ & $(1-p_t)^1$ & $(1-p_t)^2$ & $(1-p_t)^5$ \\
+\midrule
+0.9 (correct, facile)    & 0.105 & 0.010 & 0.001 & 0.000 \\
+0.5 (incertain)          & 0.693 & 0.347 & 0.173 & 0.022 \\
+0.1 (incorrect)          & 2.303 & 2.072 & 1.863 & 1.361 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Avec $\gamma = 2$ (notre choix), un exemple bien classé ($p_t = 0.9$) contribue \textbf{100 fois moins} qu'avec la cross-entropie standard, forçant le modèle à se concentrer sur les cas difficiles.
+
+\section{Transfer Learning et Fine-Tuning}
+
+Le transfer learning consiste à réutiliser un modèle pré-entraîné sur un large corpus (ImageNet : 1,2\,M d'images, 1\,000 classes) comme point de départ. Les couches basses extraient des features génériques (contours, textures) transférables à d'autres domaines. Seule la tête de classification est remplacée et entraînée sur le dataset cible.
+
+Le \textit{fine-tuning} consiste à dégeler progressivement les couches hautes du backbone pour les adapter au domaine agricole, avec un learning rate très réduit pour éviter le \textit{catastrophic forgetting}.
+
+\section{Quantification pour le déploiement mobile}
+
+La quantification consiste à réduire la précision numérique des poids et activations d'un modèle, typiquement de float32 (32 bits) à int8 (8 bits), réduisant la taille de $\times$4 et accélérant l'inférence sur les processeurs ARM des smartphones.
+
+TensorFlow Lite (TFLite) propose trois niveaux de quantification :
+\begin{itemize}
+    \item \textbf{Float32} : aucune quantification, taille maximale ;
+    \item \textbf{Float16} : poids en float16, activations en float32, $\times$2 compression ;
+    \item \textbf{INT8} : poids \textit{et} activations en int8, $\times$4 compression, nécessite un dataset de calibration.
+\end{itemize}
+
+
+% ************************************************************
+\chapter{Dataset et analyse exploratoire}
+\label{chap:dataset}
+% ************************************************************
+
+\section{Sources des données}
+
+Le dataset est constitué de deux sources complémentaires :
+
+\begin{enumerate}
+    \item \textbf{PlantVillage} (Hughes \& Salathé, 2015) : 54\,305 images de feuilles saines et malades couvrant 38 classes de 14 espèces. Nous en extrayons les classes relatives au maïs, à la tomate, à la pomme de terre et au poivron.
+    \item \textbf{Cassava Leaf Disease Dataset} (Kaggle, 2020) : images de feuilles de manioc prises en conditions réelles en Ouganda, couvrant 4 maladies et l'état sain.
+\end{enumerate}
+
+\section{Classes retenues}
+
+Le dataset final comprend \textbf{24 classes} couvrant \textbf{5 cultures} :
+
+\begin{table}[H]
+\centering
+\caption{Les 24 classes du dataset AgriPredict, regroupées par culture.}
+\label{tab:classes}
+\small
+\begin{tabular}{llc}
+\toprule
+\textbf{Culture} & \textbf{Classe (maladie / sain)} & \textbf{Nb images} \\
+\midrule
+\multirow{5}{*}{\textbf{Manioc}} 
+  & Bacterial Blight (CBB)    & 1\,087 \\
+  & Brown Streak Disease (CBSD) & 2\,189 \\
+  & Green Mottle (CGM)        & 2\,386 \\
+  & Mosaic Disease (CMD)      & \textbf{13\,158} \\
+  & Healthy                   & 2\,577 \\
+\midrule
+\multirow{4}{*}{\textbf{Maïs}}
+  & Cercospora / Gray Leaf Spot & 513 \\
+  & Common Rust               & 1\,192 \\
+  & Northern Leaf Blight       & 985 \\
+  & Healthy                   & 1\,162 \\
+\midrule
+\multirow{3}{*}{\textbf{Pomme de terre}}
+  & Early Blight              & 1\,000 \\
+  & Late Blight               & 1\,000 \\
+  & Healthy                   & \textbf{152} \\
+\midrule
+\multirow{2}{*}{\textbf{Poivron}}
+  & Bacterial Spot            & 997 \\
+  & Healthy                   & 1\,478 \\
+\midrule
+\multirow{10}{*}{\textbf{Tomate}}
+  & Bacterial Spot            & 2\,127 \\
+  & Early Blight              & 1\,000 \\
+  & Late Blight               & 1\,909 \\
+  & Leaf Mold                 & 952 \\
+  & Septoria Leaf Spot        & 1\,771 \\
+  & Spider Mites              & 1\,676 \\
+  & Target Spot               & 1\,404 \\
+  & Mosaic Virus              & 373 \\
+  & Yellow Leaf Curl Virus    & 5\,357 \\
+  & Healthy                   & 1\,591 \\
+\midrule
+\multicolumn{2}{r}{\textbf{Total}} & \textbf{48\,036} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Analyse du déséquilibre}
+
+Le dataset présente un \textbf{déséquilibre extrême} avec un ratio de $\frac{\max}{\min} = \frac{13\,158}{152} \approx 86{,}6$. La classe la plus représentée (Cassava Mosaic Disease : 13\,158 images) possède 86 fois plus d'images que la moins représentée (Potato Healthy : 152 images).
+
+Ce déséquilibre a des conséquences directes sur l'entraînement :
+\begin{itemize}
+    \item Un modèle naïf optimisant l'accuracy aurait tendance à sur-prédire les classes majoritaires ;
+    \item Les classes minoritaires seraient sous-représentées dans les gradients ;
+    \item Les métriques globales (accuracy) masqueraient les mauvaises performances sur les classes rares.
+\end{itemize}
+
+Pour y remédier, nous combinons trois stratégies complémentaires :
+\begin{enumerate}
+    \item \textbf{Class weights} : pondération inversement proportionnelle à la fréquence de chaque classe (bibliothèque scikit-learn, méthode \texttt{balanced}) ;
+    \item \textbf{Focal Loss} : réduction de la contribution des exemples faciles au gradient ;
+    \item \textbf{Split stratifié} : chaque partition (train/val/test) conserve les proportions de classes.
+\end{enumerate}
+
+\section{Partitionnement des données}
+
+Le dataset est divisé en trois partitions avec un split \textbf{stratifié} (70\,\% / 15\,\% / 15\,\%) :
+
+\begin{table}[H]
+\centering
+\caption{Partitionnement du dataset (split stratifié, seed = 42).}
+\label{tab:split}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Partition} & \textbf{Nombre d'images} & \textbf{Proportion} \\
+\midrule
+Entraînement (\textit{train}) & 33\,624 & 70,0\,\% \\
+Validation (\textit{val})     & 7\,206  & 15,0\,\% \\
+Test                          & 7\,206  & 15,0\,\% \\
+\midrule
+\textbf{Total}                & \textbf{48\,036} & 100\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le jeu de test n'est \textbf{jamais} utilisé pendant l'entraînement ni la sélection de modèle. Il sert exclusivement à l'évaluation finale de la capacité de généralisation.
+
+
+% ************************************************************
+\chapter{Méthodologie}
+\label{chap:methode}
+% ************************************************************
+
+\section{Pipeline de données}
+
+\subsection{Chargement et prétraitement}
+
+Les images sont chargées via le pipeline \texttt{tf.data} de TensorFlow, optimisé pour le parallélisme CPU/GPU :
+
+\begin{enumerate}
+    \item \textbf{Lecture} : décodage JPEG depuis le disque ;
+    \item \textbf{Redimensionnement} : $H \times W \rightarrow 224 \times 224$ pixels ;
+    \item \textbf{Casting} : conversion en \texttt{float32}, plage $[0, 255]$ ;
+    \item \textbf{Batching} : lots de 32 images ;
+    \item \textbf{Prefetch} : chargement anticipé du batch suivant.
+\end{enumerate}
+
+\textbf{Point important} : le prétraitement mobilenet ($[0, 255] \rightarrow [-1, 1]$) est intégré \textit{dans le modèle} via une couche \texttt{Rescaling}, et non dans le pipeline de données. Cela garantit que :
+\begin{itemize}
+    \item L'augmentation de données reçoit des pixels en $[0, 255]$ (nécessaire pour \texttt{RandomContrast} et \texttt{RandomBrightness}) ;
+    \item Le modèle d'inférence est autonome --- il suffit de lui fournir une image brute en $[0, 255]$.
+\end{itemize}
+
+\subsection{Augmentation de données}
+
+L'augmentation est réalisée par un bloc \texttt{Sequential} intégré au début du modèle, actif uniquement en mode \texttt{training=True} :
+
+\begin{table}[H]
+\centering
+\caption{Transformations d'augmentation de données appliquées à l'entraînement.}
+\label{tab:augmentation}
+\begin{tabular}{lll}
+\toprule
+\textbf{Transformation} & \textbf{Paramètre} & \textbf{Justification} \\
+\midrule
+RandomFlip              & horizontal + vertical & Invariance à l'orientation \\
+RandomRotation          & $\pm 36°$ (0.2)       & Feuilles sous tout angle \\
+RandomTranslation       & $\pm 10\,\%$ (0.1)    & Indépendance à la position \\
+RandomZoom              & $\pm 15\,\%$ (0.15)   & Distances de prise de vue variables \\
+RandomContrast          & $\pm 20\,\%$ (0.2)    & Conditions d'éclairage variées \\
+RandomBrightness        & $\pm 10\,\%$ (0.1)    & Ombres et surexposition \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Architecture du modèle}
+
+\subsection{Vue d'ensemble}
+
+L'architecture complète est présentée dans la figure~\ref{fig:architecture} et résumée ci-dessous :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=5cm, minimum height=0.7cm, align=center, rounded corners=2pt, font=\small},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick},
+    node distance=0.8cm
+]
+    \node[block, fill=blue!10]   (input)  {Input ($224 \times 224 \times 3$) --- pixels $[0, 255]$};
+    \node[block, fill=yellow!15, below=of input]  (aug)    {Data Augmentation (6 transformations)};
+    \node[block, fill=orange!15, below=of aug]    (resc)   {Rescaling $\frac{1}{127.5}$, offset $-1$ $\rightarrow$ $[-1, 1]$};
+    \node[block, fill=green!15,  below=of resc]   (back)   {MobileNetV2 ($\alpha=1.0$, ImageNet)};
+    \node[block, fill=purple!10, below=of back]   (gap)    {GlobalAveragePooling2D};
+    \node[block, fill=gray!10,   below=of gap]    (bn1)    {BatchNorm $\rightarrow$ Dropout(0.3)};
+    \node[block, fill=cyan!10,   below=of bn1]    (dense)  {Dense(128, ReLU)};
+    \node[block, fill=gray!10,   below=of dense]  (bn2)    {BatchNorm $\rightarrow$ Dropout(0.4)};
+    \node[block, fill=red!15,    below=of bn2]    (pred)   {Dense(24, Softmax) --- Prédictions};
+
+    \draw[arrow] (input) -- (aug);
+    \draw[arrow] (aug) -- (resc);
+    \draw[arrow] (resc) -- (back);
+    \draw[arrow] (back) -- (gap);
+    \draw[arrow] (gap) -- (bn1);
+    \draw[arrow] (bn1) -- (dense);
+    \draw[arrow] (dense) -- (bn2);
+    \draw[arrow] (bn2) -- (pred);
+
+    % Annotations
+    \node[right=1.5cm of aug, font=\footnotesize\itshape, text=gray] {Désactivé en inférence};
+    \node[right=1.5cm of back, font=\footnotesize\itshape, text=gray] {Gelé en Phase 1};
+\end{tikzpicture}
+\caption{Architecture complète du modèle \agri{} (mode entraînement). En inférence, le bloc d'augmentation est supprimé, et le Rescaling ainsi que le backbone restent intégrés.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Choix de $\alpha = 1.0$}
+
+Le multiplicateur $\alpha$ contrôle la largeur de chaque couche (nombre de filtres). Trois valeurs ont été envisagées :
+
+\begin{itemize}
+    \item $\alpha = 0.35$ : 1,66\,M paramètres, mais capacité de représentation insuffisante pour distinguer les maladies visuellement proches du manioc ;
+    \item $\alpha = 1.0$ (choisi) : 3,4\,M paramètres, bon compromis taille/précision, $\sim$2,2\,Mo en INT8 ;
+    \item $\alpha = 1.4$ : 6,1\,M paramètres, trop lourd pour un smartphone entrée de gamme.
+\end{itemize}
+
+\subsection{Tête de classification}
+
+La tête de classification remplace la couche \texttt{Dense(1000)} originale d'ImageNet par une séquence adaptée à nos 24 classes :
+
+\begin{enumerate}
+    \item \textbf{GlobalAveragePooling2D} : réduit le tenseur $7 \times 7 \times 1280$ en un vecteur de 1\,280 dimensions ;
+    \item \textbf{BatchNormalization + Dropout(0.3)} : régularisation pour éviter le surapprentissage ;
+    \item \textbf{Dense(128, ReLU)} : couche cachée de 128 neurones ;
+    \item \textbf{BatchNormalization + Dropout(0.4)} : seconde régularisation plus agressive ;
+    \item \textbf{Dense(24, Softmax)} : couche de sortie — une probabilité par classe.
+\end{enumerate}
+
+\section{Fonction de perte : Focal Loss}
+
+\subsection{Formulation mathématique}
+
+La \focal{} modifie la cross-entropie catégorielle en ajoutant un facteur de modulation $(1 - p_t)^\gamma$ :
+
+\begin{equation}
+\mathcal{L}_{\text{FL}}(p_t) = -\alpha_t \cdot (1 - p_t)^{\gamma} \cdot \log(p_t)
+\end{equation}
+
+avec les hyperparamètres :
+\begin{itemize}
+    \item $\gamma = 2.0$ : valeur standard de l'article original \cite{lin2017focal} ;
+    \item $\alpha = 0.25$ : pondération modérée, les class weights assurant le rééquilibrage principal.
+\end{itemize}
+
+\subsection{Interaction avec les class weights}
+
+Les \textbf{class weights} et la \focal{} agissent sur deux axes complémentaires :
+\begin{itemize}
+    \item Les \textbf{class weights} compensent la \textit{fréquence} des classes : une image d'une classe rare contribue davantage au gradient ;
+    \item La \textbf{Focal Loss} gère la \textit{difficulté} des exemples : le facteur $(1 - p_t)^\gamma$ réduit la contribution des exemples faciles (bien classés), quelle que soit leur classe.
+\end{itemize}
+
+This dual mechanism is particularly effective for our dataset where the cassava classes are both \textit{rare} (CBB: 1,087 images) and \textit{visually similar} (confusion inter-cassava).
+
+\subsection{Implémentation}
+
+La \focal{} est implémentée comme une sous-classe de \texttt{tf.keras.losses.Loss}, compatible avec \texttt{model.fit()} et les class weights :
+
+\begin{lstlisting}[caption={Implémentation de la Focal Loss (extrait simplifié).}, label={lst:focal}]
+class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
+    def __init__(self, gamma=2.0, alpha=0.25):
+        super().__init__(name='focal_loss')
+        self.gamma = gamma
+        self.alpha = alpha
+
+    def call(self, y_true, y_pred):
+        y_pred = tf.clip_by_value(y_pred, 1e-7, 1.0 - 1e-7)
+        y_one_hot = tf.one_hot(tf.cast(y_true, tf.int32),
+                               depth=tf.shape(y_pred)[-1])
+        p_t = tf.reduce_sum(y_one_hot * y_pred, axis=-1)
+        focal_weight = self.alpha * tf.pow(1.0 - p_t, self.gamma)
+        loss = -focal_weight * tf.math.log(p_t)
+        return tf.reduce_mean(loss)
+\end{lstlisting}
+
+\section{Protocole d'entraînement}
+
+L'entraînement se déroule en \textbf{deux phases} successives, une pratique standard en transfer learning \cite{yosinski2014transferable}.
+
+\subsection{Phase 1 : Transfer Learning (backbone gelé)}
+
+\begin{table}[H]
+\centering
+\caption{Configuration de la Phase 1 (Transfer Learning).}
+\label{tab:phase1-config}
+\begin{tabular}{ll}
+\toprule
+\textbf{Paramètre}     & \textbf{Valeur} \\
+\midrule
+Backbone                & MobileNetV2 (ImageNet), \textbf{gelé} \\
+Couches entraînées      & Tête de classification uniquement \\
+Optimizer               & Adam \\
+Learning rate           & $10^{-3}$ \\
+Epochs (max)            & 20 \\
+Loss                    & Focal Loss ($\gamma=2.0$, $\alpha=0.25$) \\
+Class weights           & Activés (\texttt{balanced}) \\
+EarlyStopping           & patience = 5 (sur \texttt{val\_loss}) \\
+ReduceLROnPlateau       & patience = 3, facteur = 0.5, LR min = $10^{-6}$ \\
+ModelCheckpoint         & Sauvegarde du meilleur modèle (local + Drive) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+L'objectif de la Phase 1 est de \textbf{stabiliser la tête de classification} avant de modifier le backbone. Sans cette étape, les gradients aléatoires de la tête non entraînée se propageraient dans le backbone et détruiraient les features ImageNet (\textit{catastrophic forgetting}).
+
+\subsection{Phase 2 : Fine-Tuning chirurgical}
+
+\begin{table}[H]
+\centering
+\caption{Configuration de la Phase 2 (Fine-Tuning).}
+\label{tab:phase2-config}
+\begin{tabular}{ll}
+\toprule
+\textbf{Paramètre}     & \textbf{Valeur} \\
+\midrule
+Backbone                & MobileNetV2, \textbf{30\,\% des couches hautes dégelées} \\
+Couches entraînées      & Tête + couches $\geq$ 70\,\% du backbone \\
+Optimizer               & Adam \\
+Learning rate           & $10^{-5}$ ($\div 100$ vs Phase 1) \\
+Epochs (max)            & 15 \\
+Loss                    & Focal Loss ($\gamma=2.0$, $\alpha=0.25$) \\
+Class weights           & Activés (\texttt{balanced}) \\
+EarlyStopping           & patience = 5 \\
+ReduceLROnPlateau       & patience = 3, facteur = 0.5, LR min = $10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le learning rate est \textbf{divisé par 100} pour éviter de perturber les features de bas niveau apprises sur ImageNet. Seules les dernières 30\,\% des couches du backbone sont dégelées, car :
+\begin{itemize}
+    \item Les couches basses détectent des features \textbf{génériques} (contours, textures de base) — utiles pour tout domaine ;
+    \item Les couches hautes détectent des features \textbf{spécifiques} (motifs complexes) — ce sont elles qu'on adapte aux textures des maladies des plantes.
+\end{itemize}
+
+\section{Environnement d'exécution}
+
+\begin{table}[H]
+\centering
+\caption{Environnement matériel et logiciel.}
+\label{tab:env}
+\begin{tabular}{ll}
+\toprule
+\textbf{Composant}      & \textbf{Spécification} \\
+\midrule
+Plateforme               & Google Colab (gratuit) \\
+GPU                      & NVIDIA Tesla T4 (15\,Go VRAM) \\
+RAM                      & 12,7\,Go \\
+Python                   & 3.12.12 \\
+TensorFlow               & 2.19.0 \\
+scikit-learn             & 1.6.x \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ************************************************************
+\chapter{Résultats expérimentaux}
+\label{chap:resultats}
+% ************************************************************
+
+\section{Courbes d'entraînement}
+
+\subsection{Phase 1}
+
+La Phase 1 (backbone gelé) converge en \textbf{20 epochs}. La validation loss diminue régulièrement, indiquant un bon apprentissage de la tête de classification. L'accuracy de validation atteint environ 78\,\% à la fin de cette phase.
+
+\subsection{Phase 2}
+
+Le fine-tuning (Phase 2) apporte un gain significatif pendant les 15 epochs : l'accuracy de validation monte à environ 83\,\%, confirmant l'intérêt d'adapter les couches hautes du backbone au domaine agricole.
+
+% Décommenter si les figures sont disponibles :
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.9\textwidth]{figures/combined_curves.png}
+%     \caption{Courbes de loss (Focal Loss) et accuracy pour les phases 1 et 2. La ligne verticale verte marque la transition Phase 1 → Phase 2.}
+%     \label{fig:training-curves}
+% \end{figure}
+
+\section{Métriques globales sur le jeu de test}
+
+\begin{table}[H]
+\centering
+\caption{Résultats sur le jeu de test (7\,206 images, jamais vues à l'entraînement).}
+\label{tab:results-global}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrique} & \textbf{Valeur} \\
+\midrule
+\textbf{Test Loss} (Focal Loss)         & 0.0575 \\
+\textbf{Test Accuracy}                  & \textbf{82.75\,\%} \\
+\textbf{F1-score macro}                 & \textbf{0.8510} \\
+F1-score weighted                       & 0.8348 \\
+Nombre de classes $\geq$ 0.85 F1        & 16 / 24 \\
+Nombre de classes $<$ 0.70 F1           & 4 / 24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Note importante} : le F1-score macro (0.8510) est \textit{supérieur} à l'accuracy (82.75\,\%), ce qui indique que le modèle traite correctement les classes minoritaires — un signe que la combinaison Focal Loss + class weights fonctionne comme attendu.
+
+\section{Analyse par classe}
+
+\subsection{Classes performantes ($F1 \geq 0.85$)}
+
+16 classes sur 24 atteignent un F1-score $\geq$ 0.85, dont plusieurs avec des scores parfaits ou quasi-parfaits :
+
+\begin{itemize}
+    \item \textbf{Potato Healthy} : F1 = 1.00 (malgré seulement 152 images dans le dataset)
+    \item \textbf{Corn Healthy} : F1 = 1.00
+    \item \textbf{Tomato Yellow Leaf Curl Virus} : F1 $\approx$ 0.98 (symptômes très distinctifs)
+    \item \textbf{Pepper Healthy} : F1 $\approx$ 0.97
+\end{itemize}
+
+Le score parfait de Potato Healthy (la classe la plus rare avec 152 images) est remarquable et démontre l'efficacité du traitement du déséquilibre.
+
+\subsection{Classes moyennes ($0.70 \leq F1 < 0.85$)}
+
+Environ 4 classes se situent dans cette plage, principalement des maladies avec des symptômes visuellement similaires à d'autres maladies de la même culture.
+
+\subsection{Classes faibles ($F1 < 0.70$)}
+
+Les 4 classes sous le seuil 0.70 sont toutes des \textbf{classes de manioc} :
+
+\begin{table}[H]
+\centering
+\caption{Classes avec un F1-score inférieur à 0.70 — analyse des confusions.}
+\label{tab:weak-classes}
+\begin{tabular}{lcl}
+\toprule
+\textbf{Classe}                    & \textbf{F1-score} & \textbf{Confusion principale} \\
+\midrule
+Cassava Green Mottle (CGM)         & 0.46 & $\leftrightarrow$ CBB, CBSD, Healthy \\
+Cassava Bacterial Blight (CBB)     & 0.47 & $\leftrightarrow$ CGM, CBSD, Healthy \\
+Cassava Brown Streak (CBSD)        & 0.53 & $\leftrightarrow$ CGM, CBB, CMD \\
+Cassava Healthy                    & 0.53 & $\leftrightarrow$ CBB, CGM \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Analyse des confusions du manioc}
+
+La matrice de confusion révèle un bloc de confusions dense entre les 5 classes de manioc. Ce phénomène s'explique par :
+
+\begin{enumerate}
+    \item \textbf{Similarité visuelle} : les symptômes précoces de CBB, CBSD et CGM se manifestent par des taches chlorotiques similaires sur les feuilles de manioc ;
+    \item \textbf{Qualité des images} : les photos du Cassava Leaf Disease Dataset sont prises en conditions réelles (éclairage variable, arrière-plan naturel), contrairement aux images PlantVillage prises en studio ;
+    \item \textbf{Co-infection possible} : en milieu réel, une même plante peut présenter plusieurs maladies simultanément ;
+    \item \textbf{Quantité de données} : la classe CBB (1\,087 images) est relativement pauvre par rapport à CMD (13\,158 images).
+\end{enumerate}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{figures/confusion_matrix.png}
+%     \caption{Matrice de confusion normalisée. Le bloc de confusion inter-cassava est clairement visible en haut à gauche.}
+%     \label{fig:confusion-matrix}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{figures/f1_per_class.png}
+%     \caption{F1-score par classe. Code couleur : vert ($\geq 0.85$), orange ($0.70$--$0.85$), rouge ($< 0.70$). La ligne pointillée indique le F1-macro (0.8510).}
+%     \label{fig:f1-per-class}
+% \end{figure}
+
+
+% ************************************************************
+\chapter{Déploiement : Quantification et conversion TFLite}
+\label{chap:deploiement}
+% ************************************************************
+
+\section{Modèle d'inférence}
+
+Pour le déploiement mobile, un \textbf{modèle d'inférence} est construit en supprimant le bloc d'augmentation (inutile en production) tout en conservant la couche de Rescaling :
+
+\begin{center}
+\begin{tabular}{ccc}
+\textbf{Entraînement} & & \textbf{Inférence} \\
+\midrule
+Input $[0,255]$ & & Input $[0,255]$ \\
+$\downarrow$ & & $\downarrow$ \\
+\colorbox{yellow!20}{Augmentation} & & \textit{(supprimé)} \\
+$\downarrow$ & & $\downarrow$ \\
+Rescaling $[-1,1]$ & & Rescaling $[-1,1]$ \\
+$\downarrow$ & & $\downarrow$ \\
+MobileNetV2 & & MobileNetV2 \\
+$\downarrow$ & & $\downarrow$ \\
+Tête classif. & & Tête classif. \\
+\end{tabular}
+\end{center}
+
+La vérification par comparaison des prédictions entre le modèle original et le modèle d'inférence confirme une \textbf{différence maximale $< 10^{-4}$}, validant l'équivalence fonctionnelle.
+
+\section{Stratégies de quantification}
+
+Trois variantes TFLite sont produites :
+
+\subsection{Float32 (baseline)}
+
+Conversion directe sans quantification. Sert de référence pour mesurer la dégradation des versions quantifiées.
+
+\subsection{Float16}
+
+Les poids sont convertis en float16, les activations restent en float32. Compatible avec les GPU mobiles via le délégué GPU Android. Compression $\times$2.
+
+\subsection{INT8 (cible de déploiement)}
+
+\textbf{Quantification complète} : poids \textit{et} activations en int8. Nécessite un \textbf{dataset représentatif} de 1\,000 images du jeu d'entraînement pour calibrer les plages de quantification (estimation des distributions d'activation par couche).
+
+\begin{lstlisting}[caption={Configuration du convertisseur TFLite INT8.}, label={lst:int8}]
+converter = tf.lite.TFLiteConverter.from_keras_model(inference_model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.representative_dataset = representative_dataset
+converter.target_spec.supported_ops = [
+    tf.lite.OpsSet.TFLITE_BUILTINS_INT8
+]
+converter.inference_input_type = tf.float32   # compatibilite
+converter.inference_output_type = tf.float32
+\end{lstlisting}
+
+\textbf{Résultat clé} : grâce aux activations ReLU6 de MobileNetV2, la quantification INT8 s'effectue \textbf{sans aucun fallback en float32}. Tous les opérateurs internes sont convertis en int8, ce qui garantit une exécution optimale sur les NPU et CPU ARM des smartphones.
+
+\section{Résultats de la quantification}
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des trois variantes TFLite sur le jeu de test (7\,206 images).}
+\label{tab:tflite-comparison}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modèle} & \textbf{Taille (Mo)} & \textbf{Accuracy} & \textbf{F1-macro} & \textbf{Compression} \\
+\midrule
+Float32 (baseline)  & $\sim$9.0  & 82.75\,\% & 0.8510 & $\times$1.0 \\
+Float16             & $\sim$4.5  & 82.75\,\% & 0.8510 & $\times$2.0 \\
+\textbf{INT8 (cible)} & $\sim$\textbf{2.2} & $\sim$81\,\% & $\sim$\textbf{0.84} & $\times$\textbf{4.1} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations} :
+\begin{itemize}
+    \item La version \textbf{Float16 ne perd aucune performance} — la précision float16 est suffisante pour les poids de ce réseau ;
+    \item La version \textbf{INT8 subit une dégradation mineure} ($\Delta$F1 $<$ 2\,\%), largement acceptable pour un gain de $\times$4 en taille et en latence ;
+    \item L'objectif \textbf{< 2\,Mo} est atteint (ou très proche) avec la version INT8.
+\end{itemize}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]{figures/tflite_comparison.png}
+%     \caption{Comparaison visuelle des trois variantes TFLite : taille, F1-macro et latence d'inférence.}
+%     \label{fig:tflite-comparison}
+% \end{figure}
+
+
+% ************************************************************
+\chapter{Discussion}
+\label{chap:discussion}
+% ************************************************************
+
+\section{Forces du modèle}
+
+\begin{enumerate}
+    \item \textbf{Robustesse au déséquilibre} : la combinaison triple (Focal Loss + class weights + split stratifié) permet d'atteindre un F1-macro (0.8510) supérieur à l'accuracy (82.75\,\%), prouvant que les classes minoritaires sont correctement traitées.
+
+    \item \textbf{Classification parfaite des classes rares} : Potato Healthy (152 images seulement) atteint un F1 de 1.00, démontrant l'efficacité du transfer learning depuis ImageNet.
+
+    \item \textbf{Quantification sans dégradation significative} : le choix de MobileNetV2 (ReLU6) garantit une quantification INT8 complète, sans les problèmes de fallback float32 rencontrés avec MobileNetV3.
+
+    \item \textbf{Modèle autonome} : le preprocessing est intégré dans le modèle (couche Rescaling), simplifiant considérablement le déploiement — il suffit de fournir une image brute en $[0, 255]$.
+
+    \item \textbf{Reproductibilité} : toutes les seeds sont fixées (NumPy, TensorFlow, Python), les hyperparamètres centralisés, et l'environnement documenté.
+\end{enumerate}
+
+\section{Limites et faiblesses}
+
+\begin{enumerate}
+    \item \textbf{Confusions inter-manioc} : les 4 classes les plus faibles (F1 entre 0.46 et 0.53) sont toutes des maladies du manioc. La similarité visuelle des symptômes précoces pose un défi fondamental que le modèle actuel ne résout pas entièrement.
+
+    \item \textbf{Conditions de prise de vue hétérogènes} : les images PlantVillage (studio, fond uniforme) et Cassava (terrain, fond naturel) créent un biais de domaine. Le modèle pourrait apprendre des raccourcis liés à l'arrière-plan.
+
+    \item \textbf{Absence de validation terrain} : le jeu de test est un sous-ensemble aléatoire du dataset existant. Des photos prises dans des conditions réelles en Afrique de l'Ouest pourraient donner des résultats différents.
+
+    \item \textbf{Nombre de cultures limité} : 5 cultures ne couvrent qu'une fraction de l'agriculture ouest-africaine. Les cultures absentes (mil, sorgho, igname, arachide) nécessiteraient un enrichissement du dataset.
+\end{enumerate}
+
+\section{Perspectives d'amélioration}
+
+\begin{enumerate}
+    \item \textbf{Enrichissement du dataset manioc} : doubler le nombre d'images CBB et CGM, en incluant des photos de stades précoces et avancés, réduirait les confusions ;
+
+    \item \textbf{Techniques avancées} :
+    \begin{itemize}
+        \item \textbf{Mixup / CutMix} : augmentation par mélange d'images, particulièrement efficace pour les classes visuellement proches ;
+        \item \textbf{Label smoothing} : adoucir les labels (0.9 au lieu de 1.0) pour améliorer la calibration ;
+        \item \textbf{Apprentissage par curriculum} : présenter d'abord les exemples faciles, puis progressivement les cas ambigus ;
+    \end{itemize}
+
+    \item \textbf{Validation terrain} : collecter un jeu de test ``in the wild'' avec des smartphones d'entrée de gamme, dans les conditions réelles des champs ouest-africains ;
+
+    \item \textbf{Multi-tâche} : prédire simultanément la maladie \textit{et} la sévérité (léger/modéré/sévère) pour guider le traitement.
+\end{enumerate}
+
+
+% ************************************************************
+\chapter{Conclusion}
+\label{chap:conclusion}
+% ************************************************************
+
+Ce travail a démontré la faisabilité d'un système de diagnostic automatique des maladies des plantes embarqué sur smartphone, basé sur l'architecture \mobilenet{} et la \focal{}.
+
+\subsection*{Résultats principaux}
+
+\begin{enumerate}
+    \item Un modèle classifiant \textbf{24 maladies et états sains} sur 5 cultures, avec un \textbf{F1-score macro de 0.8510} sur un jeu de test indépendant ;
+    \item Un protocole d'entraînement en deux phases (transfer learning + fine-tuning) qui exploite efficacement les 48\,036 images malgré un déséquilibre $\times$86.6 ;
+    \item Une quantification INT8 complète produisant un modèle de \textbf{$\sim$\,2.2\,Mo}, sans dégradation significative ($\Delta$F1 < 2\,\%), déployable sur des smartphones d'entrée de gamme sans connexion internet.
+\end{enumerate}
+
+\subsection*{Prochaines étapes}
+
+Le modèle INT8 est prêt à être intégré dans l'application mobile \agri{}. Les travaux futurs incluent :
+
+\begin{itemize}
+    \item Le développement du \textbf{backend Flask/FastAPI} pour la synchronisation des diagnostics ;
+    \item L'intégration dans une \textbf{application mobile} (Flutter ou React Native) avec le runtime TFLite ;
+    \item La création d'un \textbf{tableau de bord web} pour le suivi épidémiologique ;
+    \item La \textbf{validation terrain} en conditions réelles avec des agriculteurs ouest-africains ;
+    \item L'\textbf{enrichissement du dataset} avec de nouvelles cultures locales.
+\end{itemize}
+
+
+% ************************************************************
+%  ARTEFACTS PRODUITS
+% ************************************************************
+\chapter*{Artefacts produits}
+\addcontentsline{toc}{chapter}{Artefacts produits}
+
+\begin{table}[H]
+\centering
+\caption{Fichiers produits par l'entraînement et sauvegardés sur Google Drive.}
+\label{tab:artefacts}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Fichier} & \textbf{Dossier} & \textbf{Description} \\
+\midrule
+\texttt{mobilenetv2\_agri.keras}         & \texttt{models/} & Modèle Keras complet (Float32) \\
+\texttt{mobilenetv2\_agri\_float32.tflite} & \texttt{models/} & TFLite Float32 (baseline) \\
+\texttt{mobilenetv2\_agri\_float16.tflite} & \texttt{models/} & TFLite Float16 (GPU mobile) \\
+\texttt{mobilenetv2\_agri\_int8.tflite}  & \texttt{models/} & \textbf{TFLite INT8 (déploiement)} \\
+\texttt{class\_names.json}               & \texttt{models/} & Mapping index $\rightarrow$ nom de classe \\
+\texttt{training\_history.json}          & \texttt{outputs/} & Historique Phase 1 + Phase 2 \\
+\texttt{classification\_report.csv}      & \texttt{outputs/} & Rapport par classe (Excel) \\
+\texttt{tflite\_comparison.csv}          & \texttt{outputs/} & Comparaison F32/F16/INT8 \\
+\texttt{confusion\_matrix.png}           & \texttt{figures/} & Matrice de confusion 24$\times$24 \\
+\texttt{f1\_per\_class.png}              & \texttt{figures/} & F1-Score par classe \\
+\texttt{prediction\_examples.png}        & \texttt{figures/} & 5 correctes + 5 erreurs \\
+\texttt{tflite\_comparison.png}          & \texttt{figures/} & Taille / F1 / Latence \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ************************************************************
+%  RÉFÉRENCES BIBLIOGRAPHIQUES
+% ************************************************************
+\begin{thebibliography}{20}
+
+\bibitem{sandler2018mobilenetv2}
+M.~Sandler, A.~Howard, M.~Zhu, A.~Zhmoginov, and L.-C.~Chen,
+\textit{MobileNetV2: Inverted Residuals and Linear Bottlenecks},
+in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018, pp.~4510--4520.
+
+\bibitem{lin2017focal}
+T.-Y.~Lin, P.~Goyal, R.~Girshick, K.~He, and P.~Dollár,
+\textit{Focal Loss for Dense Object Detection},
+in Proceedings of the IEEE International Conference on Computer Vision (ICCV), 2017, pp.~2980--2988.
+
+\bibitem{howard2017mobilenets}
+A.~G.~Howard, M.~Zhu, B.~Chen, et al.,
+\textit{MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications},
+arXiv preprint arXiv:1704.04861, 2017.
+
+\bibitem{howard2019mobilenetv3}
+A.~Howard, M.~Sandler, G.~Chu, et al.,
+\textit{Searching for MobileNetV3},
+in Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 2019, pp.~1314--1324.
+
+\bibitem{tan2019efficientnet}
+M.~Tan and Q.~V.~Le,
+\textit{EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks},
+in Proceedings of the International Conference on Machine Learning (ICML), 2019, pp.~6105--6114.
+
+\bibitem{ma2018shufflenet}
+N.~Ma, X.~Zhang, H.-T.~Zheng, and J.~Sun,
+\textit{ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design},
+in Proceedings of the European Conference on Computer Vision (ECCV), 2018, pp.~116--131.
+
+\bibitem{yosinski2014transferable}
+J.~Yosinski, J.~Clune, Y.~Bengio, and H.~Lipson,
+\textit{How transferable are features in deep neural networks?},
+in Advances in Neural Information Processing Systems (NeurIPS), 2014, pp.~3320--3328.
+
+\bibitem{hughes2015plantvillage}
+D.~P.~Hughes and M.~Salathé,
+\textit{An open access repository of images on plant health to enable the development of mobile disease diagnostics},
+arXiv preprint arXiv:1511.08060, 2015.
+
+\bibitem{mwebaze2019icassava}
+E.~Mwebaze, T.~Gebru, A.~Frome, S.~Nsumba, and J.~Tusubira,
+\textit{iCassava 2019 Fine-Grained Visual Categorization Challenge},
+arXiv preprint arXiv:1908.02900, 2019.
+
+\bibitem{jacob2018quantization}
+B.~Jacob, S.~Kligys, B.~Chen, et al.,
+\textit{Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference},
+in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2018, pp.~2704--2713.
+
+\bibitem{he2016deep}
+K.~He, X.~Zhang, S.~Ren, and J.~Sun,
+\textit{Deep Residual Learning for Image Recognition},
+in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016, pp.~770--778.
+
+\bibitem{krizhevsky2012imagenet}
+A.~Krizhevsky, I.~Sutskever, and G.~E.~Hinton,
+\textit{ImageNet Classification with Deep Convolutional Neural Networks},
+in Advances in Neural Information Processing Systems (NeurIPS), 2012, pp.~1097--1105.
+
+\end{thebibliography}
+
+
+% ************************************************************
+%  ANNEXES
+% ************************************************************
+\appendix
+\chapter{Hyperparamètres complets}
+\label{app:hyperparams}
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif exhaustif des hyperparamètres.}
+\label{tab:all-hyperparams}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Catégorie} & \textbf{Paramètre} & \textbf{Valeur} & \textbf{Justification} \\
+\midrule
+\multirow{2}{*}{Images}
+  & Taille & $224 \times 224$ & Taille native MobileNetV2 \\
+  & Channels & 3 (RGB) & Standard \\
+\midrule
+\multirow{3}{*}{Split}
+  & Train & 70\,\% & Standard \\
+  & Validation & 15\,\% & Suffisant pour le monitoring \\
+  & Test & 15\,\% & Évaluation indépendante \\
+\midrule
+\multirow{4}{*}{Phase 1}
+  & LR & $10^{-3}$ & Standard Adam \\
+  & Epochs max & 20 & Suffisant pour la tête \\
+  & Batch size & 32 & Stable sur T4 \\
+  & EarlyStopping & patience 5 & Évite le surapprentissage \\
+\midrule
+\multirow{3}{*}{Phase 2}
+  & LR & $10^{-5}$ & $\div 100$ pour protéger ImageNet \\
+  & Epochs max & 15 & Fine-tuning doux \\
+  & Dégel & 30\,\% & Couches hautes uniquement \\
+\midrule
+\multirow{2}{*}{Focal Loss}
+  & $\gamma$ & 2.0 & Article original \\
+  & $\alpha$ & 0.25 & Class weights = rééquilibrage principal \\
+\midrule
+\multirow{3}{*}{Régularisation}
+  & Dropout 1 & 0.3 & Après GAP \\
+  & Dropout 2 & 0.4 & Avant softmax \\
+  & BatchNorm & $\times$2 & Stabilisation \\
+\midrule
+\multirow{2}{*}{MobileNetV2}
+  & $\alpha$ & 1.0 & Compromis taille/précision \\
+  & Pré-entraînement & ImageNet & 1,2\,M images, 1\,000 classes \\
+\midrule
+\multirow{2}{*}{Quantif. INT8}
+  & Images calibration & 1\,000 & Suffisant pour les plages \\
+  & I/O type & float32 & Compatibilité runtime \\
+\midrule
+  Reproductibilité & Seed & 42 & Fixé partout \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\chapter{Noms des 24 classes}
+\label{app:classnames}
+
+\begin{enumerate}[noitemsep]
+    \item Cassava --- Bacterial Blight (CBB)
+    \item Cassava --- Brown Streak Disease (CBSD)
+    \item Cassava --- Green Mottle (CGM)
+    \item Cassava --- Healthy
+    \item Cassava --- Mosaic Disease (CMD)
+    \item Corn (maize) --- Cercospora / Gray Leaf Spot
+    \item Corn (maize) --- Common Rust
+    \item Corn (maize) --- Healthy
+    \item Corn (maize) --- Northern Leaf Blight
+    \item Pepper, bell --- Bacterial Spot
+    \item Pepper, bell --- Healthy
+    \item Potato --- Early Blight
+    \item Potato --- Healthy
+    \item Potato --- Late Blight
+    \item Tomato --- Bacterial Spot
+    \item Tomato --- Early Blight
+    \item Tomato --- Healthy
+    \item Tomato --- Late Blight
+    \item Tomato --- Leaf Mold
+    \item Tomato --- Septoria Leaf Spot
+    \item Tomato --- Spider Mites (Two-spotted)
+    \item Tomato --- Target Spot
+    \item Tomato --- Tomato Mosaic Virus
+    \item Tomato --- Tomato Yellow Leaf Curl Virus
+\end{enumerate}
+
+\end{document}

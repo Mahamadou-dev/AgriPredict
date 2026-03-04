@@ -1,0 +1,36 @@
+AgriPredict — Classification Report (Test Set)
+Date : 2026-03-02 04:36
+Test images : 7206
+Accuracy : 0.7677
+F1 macro : 0.7878
+
+                                                    precision    recall  f1-score   support
+
+Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot      0.797     0.818     0.808        77
+                       Corn_(maize)___Common_rust_      1.000     1.000     1.000       179
+               Corn_(maize)___Northern_Leaf_Blight      0.894     0.912     0.903       148
+                            Corn_(maize)___healthy      0.994     0.989     0.991       174
+                     Pepper,_bell___Bacterial_spot      0.967     0.987     0.977       149
+                            Pepper,_bell___healthy      0.995     0.950     0.972       222
+                             Potato___Early_blight      0.974     0.987     0.980       150
+                              Potato___Late_blight      0.810     0.940     0.870       150
+                                  Potato___healthy      0.821     1.000     0.902        23
+                           Tomato___Bacterial_spot      0.930     0.671     0.780       319
+                             Tomato___Early_blight      0.885     0.567     0.691       150
+                              Tomato___Late_blight      0.957     0.699     0.808       286
+                                Tomato___Leaf_Mold      0.796     0.902     0.846       143
+                       Tomato___Septoria_leaf_spot      0.739     0.925     0.821       266
+     Tomato___Spider_mites Two-spotted_spider_mite      0.826     0.773     0.798       251
+                              Tomato___Target_Spot      0.528     0.768     0.625       211
+            Tomato___Tomato_Yellow_Leaf_Curl_Virus      0.994     0.894     0.942       804
+                      Tomato___Tomato_mosaic_virus      0.659     1.000     0.794        56
+                                  Tomato___healthy      0.735     0.996     0.845       239
+                  cassava___bacterial_blight_(cbb)      0.317     0.583     0.410       163
+             cassava___brown_streak_disease_(cbsd)      0.397     0.595     0.476       328
+                      cassava___green_mottle_(cgm)      0.394     0.475     0.431       358
+                                 cassava___healthy      0.465     0.402     0.431       386
+                    cassava___mosaic_disease_(cmd)      0.883     0.737     0.804      1974
+
+                                          accuracy                          0.768      7206
+                                         macro avg      0.782     0.815     0.788      7206
+                                      weighted avg      0.803     0.768     0.777      7206
