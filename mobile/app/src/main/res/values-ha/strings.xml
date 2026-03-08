@@ -1,0 +1,53 @@
+﻿<resources>
+    <string name="app_name">AgriPredict</string>
+    <string name="home_title">AgriPredict</string>
+    <string name="home_subtitle">Mataimakin noma mai basira</string>
+    <string name="home_do_diagnostic">Yi bincike</string>
+    <string name="home_learn_diseases">Cututtukan tsirrai</string>
+    <string name="home_alerts">Sanarwar noma</string>
+    <string name="home_history">Tarihi</string>
+    <string name="home_contact_expert">Tuntu&#595;i masani</string>
+    <string name="home_about">Game da mu</string>
+    <string name="diagnostic_title">Bincike ta AI</string>
+    <string name="diagnostic_take_photo">&#x0110;auki hoto</string>
+    <string name="diagnostic_analyze">Bincika</string>
+    <string name="diagnostic_result_disease">An gano cuta</string>
+    <string name="diagnostic_result_confidence">Tabbaci</string>
+    <string name="diagnostic_result_advice">Shawara</string>
+    <string name="diagnostic_result_treatment">Magani</string>
+    <string name="diagnostic_no_image">Ba a za&#595;i hoto ba</string>
+    <string name="diagnostic_analyzing">Ana bincike...</string>
+    <string name="nav_home">Gida</string>
+    <string name="nav_diagnostic">Bincike</string>
+    <string name="nav_diseases">Cututtuka</string>
+    <string name="nav_alerts">Sanarwa</string>
+    <string name="nav_history">Tarihi</string>
+    <string name="nav_expert">Masani</string>
+    <string name="nav_about">Game da mu</string>
+    <string name="nav_settings">Saituna</string>
+    <string name="settings_title">Saituna</string>
+    <string name="settings_language">Harshe</string>
+    <string name="settings_language_fr">Fran&#231;ais</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ha">Hausa</string>
+    <string name="settings_language_dje">Zarma</string>
+    <string name="loading">Ana lodi...</string>
+    <string name="error_generic">An samu kuskure</string>
+    <string name="retry">Sake gwadawa</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Soke</string>
+    <string name="save">Ajiye</string>
+    <string name="back">Komawa</string>
+    <string name="sync_in_progress">Ana ha&#x0257;awa...</string>
+    <string name="sync_success">An ha&#x0257;a da nasara</string>
+    <string name="sync_error">Kuskuren ha&#x0257;awa</string>
+    <string name="sync_offline">Ba tare da intanet ba</string>
+    <plurals name="diseases_detected_count">
+        <item quantity="one">An gano cuta %d</item>
+        <item quantity="other">An gano cututtuka %d</item>
+    </plurals>
+    <plurals name="diagnostics_count">
+        <item quantity="one">Bincike %d</item>
+        <item quantity="other">Bincike %d</item>
+    </plurals>
+</resources>

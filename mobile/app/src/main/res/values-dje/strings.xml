@@ -1,0 +1,53 @@
+﻿<resources>
+    <string name="app_name">AgriPredict</string>
+    <string name="home_title">AgriPredict</string>
+    <string name="home_subtitle">Ni faala ka&#x014B; ga gaabu</string>
+    <string name="home_do_diagnostic">Ceeci bay</string>
+    <string name="home_learn_diseases">Habu duwey</string>
+    <string name="home_alerts">Bayrandi faaley</string>
+    <string name="home_history">Taariki</string>
+    <string name="home_contact_expert">Bay boro se sala&#x014B;</string>
+    <string name="home_about">Boro bo&#x014B;</string>
+    <string name="diagnostic_title">AI ceeci bay</string>
+    <string name="diagnostic_take_photo">Foto kaa</string>
+    <string name="diagnostic_analyze">Ceeci</string>
+    <string name="diagnostic_result_disease">Doori ka&#x014B; duwandi</string>
+    <string name="diagnostic_result_confidence">Naanay</string>
+    <string name="diagnostic_result_advice">Laakari</string>
+    <string name="diagnostic_result_treatment">Safara</string>
+    <string name="diagnostic_no_image">Foto kulu si no</string>
+    <string name="diagnostic_analyzing">Goo ma ceeci...</string>
+    <string name="nav_home">Fuwo</string>
+    <string name="nav_diagnostic">Ceeci bay</string>
+    <string name="nav_diseases">Duwey</string>
+    <string name="nav_alerts">Bayrandi</string>
+    <string name="nav_history">Taariki</string>
+    <string name="nav_expert">Bay boro</string>
+    <string name="nav_about">Boro bo&#x014B;</string>
+    <string name="nav_settings">Gaasuley</string>
+    <string name="settings_title">Gaasuley</string>
+    <string name="settings_language">Sanni</string>
+    <string name="settings_language_fr">Fran&#231;ais</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ha">Hausa</string>
+    <string name="settings_language_dje">Zarma</string>
+    <string name="loading">Goo ma zuuru...</string>
+    <string name="error_generic">Firka foo bangay</string>
+    <string name="retry">Ceeci koyne</string>
+    <string name="ok">Ayyo</string>
+    <string name="cancel">Na&#x014B;</string>
+    <string name="save">Gaay</string>
+    <string name="back">Yeeji</string>
+    <string name="sync_in_progress">Goo ma cimandi...</string>
+    <string name="sync_success">Cimandi boryo</string>
+    <string name="sync_error">Cimandi firka</string>
+    <string name="sync_offline">Enternet kulu si no</string>
+    <plurals name="diseases_detected_count">
+        <item quantity="one">Doori %d duwandi</item>
+        <item quantity="other">Duwey %d duwandi</item>
+    </plurals>
+    <plurals name="diagnostics_count">
+        <item quantity="one">Ceeci bay %d</item>
+        <item quantity="other">Ceeci bay %d</item>
+    </plurals>
+</resources>
