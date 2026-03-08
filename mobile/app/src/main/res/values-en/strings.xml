@@ -1,0 +1,53 @@
+﻿<resources>
+    <string name="app_name">AgriPredict</string>
+    <string name="home_title">AgriPredict</string>
+    <string name="home_subtitle">Your smart farming assistant</string>
+    <string name="home_do_diagnostic">Run a diagnostic</string>
+    <string name="home_learn_diseases">Plant diseases</string>
+    <string name="home_alerts">Farm alerts</string>
+    <string name="home_history">History</string>
+    <string name="home_contact_expert">Contact an expert</string>
+    <string name="home_about">About</string>
+    <string name="diagnostic_title">AI Diagnostic</string>
+    <string name="diagnostic_take_photo">Take a photo</string>
+    <string name="diagnostic_analyze">Analyze</string>
+    <string name="diagnostic_result_disease">Disease detected</string>
+    <string name="diagnostic_result_confidence">Confidence</string>
+    <string name="diagnostic_result_advice">Advice</string>
+    <string name="diagnostic_result_treatment">Treatment</string>
+    <string name="diagnostic_no_image">No image selected</string>
+    <string name="diagnostic_analyzing">Analyzing...</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_diagnostic">Diagnostic</string>
+    <string name="nav_diseases">Diseases</string>
+    <string name="nav_alerts">Alerts</string>
+    <string name="nav_history">History</string>
+    <string name="nav_expert">Expert</string>
+    <string name="nav_about">About</string>
+    <string name="nav_settings">Settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_fr">Fran&#231;ais</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ha">Hausa</string>
+    <string name="settings_language_dje">Zarma</string>
+    <string name="loading">Loading...</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="sync_in_progress">Syncing...</string>
+    <string name="sync_success">Sync successful</string>
+    <string name="sync_error">Sync error</string>
+    <string name="sync_offline">Offline mode</string>
+    <plurals name="diseases_detected_count">
+        <item quantity="one">%d disease detected</item>
+        <item quantity="other">%d diseases detected</item>
+    </plurals>
+    <plurals name="diagnostics_count">
+        <item quantity="one">%d diagnostic</item>
+        <item quantity="other">%d diagnostics</item>
+    </plurals>
+</resources>

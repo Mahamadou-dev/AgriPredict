@@ -1,0 +1,68 @@
+<resources>
+    <!-- === Nom de l'application === -->
+    <string name="app_name">AgriPredict</string>
+
+    <!-- === Écran d'accueil === -->
+    <string name="home_title">AgriPredict</string>
+    <string name="home_subtitle">Votre assistant agricole intelligent</string>
+    <string name="home_do_diagnostic">Faire un diagnostic</string>
+    <string name="home_learn_diseases">Maladies des plantes</string>
+    <string name="home_alerts">Alertes agricoles</string>
+    <string name="home_history">Historique</string>
+    <string name="home_contact_expert">Contacter un expert</string>
+    <string name="home_about">À propos</string>
+
+    <!-- === Écran Diagnostic === -->
+    <string name="diagnostic_title">Diagnostic IA</string>
+    <string name="diagnostic_take_photo">Prendre une photo</string>
+    <string name="diagnostic_analyze">Analyser</string>
+    <string name="diagnostic_result_disease">Maladie détectée</string>
+    <string name="diagnostic_result_confidence">Confiance</string>
+    <string name="diagnostic_result_advice">Conseils</string>
+    <string name="diagnostic_result_treatment">Traitement</string>
+    <string name="diagnostic_no_image">Aucune image sélectionnée</string>
+    <string name="diagnostic_analyzing">Analyse en cours…</string>
+
+    <!-- === Navigation === -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_diagnostic">Diagnostic</string>
+    <string name="nav_diseases">Maladies</string>
+    <string name="nav_alerts">Alertes</string>
+    <string name="nav_history">Historique</string>
+    <string name="nav_expert">Expert</string>
+    <string name="nav_about">À propos</string>
+    <string name="nav_settings">Paramètres</string>
+
+    <!-- === Paramètres === -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_ha">Hausa</string>
+    <string name="settings_language_dje">Zarma</string>
+
+    <!-- === Général === -->
+    <string name="loading">Chargement…</string>
+    <string name="error_generic">Une erreur est survenue</string>
+    <string name="retry">Réessayer</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="save">Enregistrer</string>
+    <string name="back">Retour</string>
+
+    <!-- === Synchronisation === -->
+    <string name="sync_in_progress">Synchronisation en cours…</string>
+    <string name="sync_success">Synchronisation réussie</string>
+    <string name="sync_error">Erreur de synchronisation</string>
+    <string name="sync_offline">Mode hors ligne</string>
+
+    <!-- === Pluriels === -->
+    <plurals name="diseases_detected_count">
+        <item quantity="one">%d maladie détectée</item>
+        <item quantity="other">%d maladies détectées</item>
+    </plurals>
+    <plurals name="diagnostics_count">
+        <item quantity="one">%d diagnostic</item>
+        <item quantity="other">%d diagnostics</item>
+    </plurals>
+</resources>

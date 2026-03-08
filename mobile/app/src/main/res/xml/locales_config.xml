@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Configuration des langues supportées par AgriPredict.
+    Android utilise ce fichier pour afficher les langues disponibles
+    dans les paramètres système (Android 13+).
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="fr" />    <!-- Français (par défaut) -->
+    <locale android:name="en" />    <!-- Anglais -->
+    <locale android:name="ha" />    <!-- Hausa -->
+    <locale android:name="dje" />   <!-- Zarma -->
+</locale-config>
+
