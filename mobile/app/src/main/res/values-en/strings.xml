@@ -1,4 +1,5 @@
-﻿<resources>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <string name="app_name">AgriPredict</string>
     <string name="home_title">AgriPredict</string>
     <string name="home_subtitle">Your smart farming assistant</string>
@@ -15,8 +16,19 @@
     <string name="diagnostic_result_confidence">Confidence</string>
     <string name="diagnostic_result_advice">Advice</string>
     <string name="diagnostic_result_treatment">Treatment</string>
-    <string name="diagnostic_no_image">No image selected</string>
+    <string name="diagnostic_no_image">Start a diagnostic</string>
+    <string name="diagnostic_instruction">Take a photo or pick an image of your plant</string>
+    <string name="diagnostic_image_ready">Image ready for analysis</string>
+    <string name="diagnostic_captured_image">Captured image</string>
+    <string name="diagnostic_retake">Retake</string>
+    <string name="diagnostic_pick_gallery">Gallery</string>
     <string name="diagnostic_analyzing">Analyzing...</string>
+    <string name="diagnostic_analyzing_subtitle">The AI model is examining your plant</string>
+    <string name="diagnostic_demo_mode">⚠ Demo mode — AI model not installed</string>
+    <string name="diagnostic_new">New diagnostic</string>
+    <string name="diagnostic_save_success">Diagnostic saved!</string>
+    <string name="diagnostic_save_subtitle">Find it in your history</string>
+    <string name="diagnostic_result_healthy">✅ Healthy plant</string>
     <string name="nav_home">Home</string>
     <string name="nav_diagnostic">Diagnostic</string>
     <string name="nav_diseases">Diseases</string>

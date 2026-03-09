@@ -1,12 +1,16 @@
 package com.example.agripredict.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.agripredict.AgriPredictApplication
 import com.example.agripredict.ui.screens.about.AboutScreen
 import com.example.agripredict.ui.screens.alerts.AlertsScreen
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticScreen
+import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
 import com.example.agripredict.ui.screens.diseases.DiseasesScreen
 import com.example.agripredict.ui.screens.expert.ExpertScreen
 import com.example.agripredict.ui.screens.history.HistoryScreen
@@ -21,6 +25,10 @@ import com.example.agripredict.ui.screens.settings.SettingsScreen
  */
 @Composable
 fun AgriPredictNavGraph(navController: NavHostController) {
+    // Récupérer le conteneur DI depuis l'Application
+    val context = LocalContext.current
+    val appContainer = (context.applicationContext as AgriPredictApplication).container
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -38,9 +46,15 @@ fun AgriPredictNavGraph(navController: NavHostController) {
             )
         }
 
-        // Diagnostic IA
+        // Diagnostic IA — avec ViewModel injecté
         composable(Screen.Diagnostic.route) {
-            DiagnosticScreen(onNavigateBack = { navController.popBackStack() })
+            val diagnosticViewModel: DiagnosticViewModel = viewModel(
+                factory = appContainer.diagnosticViewModelFactory
+            )
+            DiagnosticScreen(
+                viewModel = diagnosticViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Base de connaissances : maladies

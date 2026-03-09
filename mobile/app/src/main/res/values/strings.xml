@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- === Nom de l'application === -->
     <string name="app_name">AgriPredict</string>
@@ -20,8 +21,19 @@
     <string name="diagnostic_result_confidence">Confiance</string>
     <string name="diagnostic_result_advice">Conseils</string>
     <string name="diagnostic_result_treatment">Traitement</string>
-    <string name="diagnostic_no_image">Aucune image sélectionnée</string>
+    <string name="diagnostic_no_image">Commencez un diagnostic</string>
+    <string name="diagnostic_instruction">Prenez une photo ou choisissez une image de votre plante</string>
+    <string name="diagnostic_image_ready">Image prête pour l\'analyse</string>
+    <string name="diagnostic_captured_image">Image capturée</string>
+    <string name="diagnostic_retake">Reprendre</string>
+    <string name="diagnostic_pick_gallery">Galerie</string>
     <string name="diagnostic_analyzing">Analyse en cours…</string>
+    <string name="diagnostic_analyzing_subtitle">Le modèle IA examine votre plante</string>
+    <string name="diagnostic_demo_mode">⚠ Mode démonstration — modèle IA non installé</string>
+    <string name="diagnostic_new">Nouveau diagnostic</string>
+    <string name="diagnostic_save_success">Diagnostic sauvegardé !</string>
+    <string name="diagnostic_save_subtitle">Retrouvez-le dans votre historique</string>
+    <string name="diagnostic_result_healthy">✅ Plante saine</string>
 
     <!-- === Navigation === -->
     <string name="nav_home">Accueil</string>

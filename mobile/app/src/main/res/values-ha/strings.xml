@@ -1,4 +1,5 @@
-﻿<resources>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <string name="app_name">AgriPredict</string>
     <string name="home_title">AgriPredict</string>
     <string name="home_subtitle">Mataimakin noma mai basira</string>
@@ -15,8 +16,19 @@
     <string name="diagnostic_result_confidence">Tabbaci</string>
     <string name="diagnostic_result_advice">Shawara</string>
     <string name="diagnostic_result_treatment">Magani</string>
-    <string name="diagnostic_no_image">Ba a za&#595;i hoto ba</string>
+    <string name="diagnostic_no_image">Fara bincike</string>
+    <string name="diagnostic_instruction">&#x0110;auki hoto ko za&#595;i hoto daga na&#x0257;in tsiron ka</string>
+    <string name="diagnostic_image_ready">Hoto ya shirya don bincike</string>
+    <string name="diagnostic_captured_image">Hoton da aka &#x0257;auka</string>
+    <string name="diagnostic_retake">Sake</string>
+    <string name="diagnostic_pick_gallery">Rumbun hoto</string>
     <string name="diagnostic_analyzing">Ana bincike...</string>
+    <string name="diagnostic_analyzing_subtitle">AI na nazarin tsiron ka</string>
+    <string name="diagnostic_demo_mode">⚠ Yanayin gwaji — ba a shigar da tsarin AI ba</string>
+    <string name="diagnostic_new">Sabon bincike</string>
+    <string name="diagnostic_save_success">An ajiye binciken!</string>
+    <string name="diagnostic_save_subtitle">Za ka same shi a tarihin ka</string>
+    <string name="diagnostic_result_healthy">✅ Tsiro lafiyayye</string>
     <string name="nav_home">Gida</string>
     <string name="nav_diagnostic">Bincike</string>
     <string name="nav_diseases">Cututtuka</string>

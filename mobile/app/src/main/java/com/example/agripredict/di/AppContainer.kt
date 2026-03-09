@@ -10,6 +10,8 @@ import com.example.agripredict.domain.usecase.GetDiagnosticsUseCase
 import com.example.agripredict.domain.usecase.SaveDiagnosticUseCase
 import com.example.agripredict.sync.NetworkChecker
 import com.example.agripredict.sync.SyncManager
+import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
+import com.example.agripredict.util.TFLiteClassifier
 
 /**
  * Conteneur d'injection de dépendances simple.
@@ -44,12 +46,15 @@ class AppContainer(private val context: Context) {
 
     // === Repositories ===
     val diagnosticRepository: DiagnosticRepository by lazy {
-        DiagnosticRepositoryImpl(diagnosticDao)
+        DiagnosticRepositoryImpl(diagnosticDao, imageDao, predictionDao)
     }
 
     // === Use Cases ===
     val getDiagnosticsUseCase by lazy { GetDiagnosticsUseCase(diagnosticRepository) }
     val saveDiagnosticUseCase by lazy { SaveDiagnosticUseCase(diagnosticRepository) }
+
+    // === IA : Classifieur TensorFlow Lite ===
+    val tfliteClassifier by lazy { TFLiteClassifier(context) }
 
     // === Préférences ===
     val languagePreferences by lazy { LanguagePreferences(context) }
@@ -57,5 +62,19 @@ class AppContainer(private val context: Context) {
     // === Synchronisation ===
     val networkChecker by lazy { NetworkChecker(context) }
     val syncManager by lazy { SyncManager(networkChecker) }
+
+    // === ViewModels Factories ===
+
+    /**
+     * Factory pour créer le DiagnosticViewModel avec ses dépendances.
+     * Utilisé dans le NavGraph via viewModel(factory = ...).
+     */
+    val diagnosticViewModelFactory by lazy {
+        DiagnosticViewModel.Factory(
+            classifier = tfliteClassifier,
+            saveDiagnosticUseCase = saveDiagnosticUseCase,
+            appContext = context
+        )
+    }
 }
 
