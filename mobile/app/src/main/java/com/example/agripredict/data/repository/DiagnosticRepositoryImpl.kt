@@ -1,5 +1,8 @@
 package com.example.agripredict.data.repository
 
+import android.util.Log
+import androidx.room.withTransaction
+import com.example.agripredict.data.local.AgriPredictDatabase
 import com.example.agripredict.data.local.dao.DiagnosticDao
 import com.example.agripredict.data.local.dao.ImageDao
 import com.example.agripredict.data.local.dao.PredictionDao
@@ -21,12 +24,23 @@ import java.util.UUID
  *
  * Gère la sauvegarde complète d'un diagnostic :
  * DiagnosticEntity + ImageEntity + PredictionEntity
+ *
+ * IMPORTANT : L'ordre d'insertion respecte les contraintes FK :
+ *   1. DiagnosticEntity (parent)
+ *   2. ImageEntity (FK → Diagnostic)
+ *   3. PredictionEntity (FK → Diagnostic)
+ *   4. Mise à jour du DiagnosticEntity avec les IDs image/prediction
  */
 class DiagnosticRepositoryImpl(
+    private val database: AgriPredictDatabase,
     private val diagnosticDao: DiagnosticDao,
     private val imageDao: ImageDao,
     private val predictionDao: PredictionDao
 ) : DiagnosticRepository {
+
+    companion object {
+        private const val TAG = "DiagnosticRepository"
+    }
 
     override fun observeAllDiagnostics(): Flow<List<DiagnosticResult>> {
         return diagnosticDao.observeAll().map { entities ->
@@ -35,45 +49,61 @@ class DiagnosticRepositoryImpl(
     }
 
     override suspend fun saveDiagnostic(result: DiagnosticResult) {
-        // 1. Sauvegarder l'image si présente
-        val imageId = if (result.imagePath.isNotBlank()) {
-            val id = UUID.randomUUID().toString()
-            imageDao.insert(
-                ImageEntity(
-                    id = id,
-                    path = result.imagePath,
-                    diagnosticId = result.id
+        database.withTransaction {
+            // 1. Sauvegarder le diagnostic EN PREMIER (c'est le parent des FK)
+            diagnosticDao.insert(
+                DiagnosticEntity(
+                    id = result.id,
+                    userId = result.userId,
+                    date = result.date,
+                    syncStatus = result.syncStatus
                 )
             )
-            id
-        } else null
 
-        // 2. Sauvegarder la prédiction IA si présente
-        val predictionId = if (result.label.isNotBlank()) {
-            val id = UUID.randomUUID().toString()
-            predictionDao.insert(
-                PredictionEntity(
-                    id = id,
-                    label = result.label,
-                    confidence = result.confidence,
-                    modelVersion = result.modelVersion,
-                    diagnosticId = result.id
+            // 2. Sauvegarder l'image si présente (FK → diagnostic_local.id)
+            val imageId = if (result.imagePath.isNotBlank()) {
+                val id = UUID.randomUUID().toString()
+                imageDao.insert(
+                    ImageEntity(
+                        id = id,
+                        path = result.imagePath,
+                        diagnosticId = result.id
+                    )
                 )
-            )
-            id
-        } else null
+                id
+            } else null
 
-        // 3. Sauvegarder le diagnostic avec les références
-        diagnosticDao.insert(
-            DiagnosticEntity(
-                id = result.id,
-                userId = result.userId,
-                date = result.date,
-                syncStatus = result.syncStatus,
-                imageId = imageId,
-                predictionId = predictionId
-            )
-        )
+            // 3. Sauvegarder la prédiction IA si présente (FK → diagnostic_local.id)
+            val predictionId = if (result.label.isNotBlank()) {
+                val id = UUID.randomUUID().toString()
+                predictionDao.insert(
+                    PredictionEntity(
+                        id = id,
+                        label = result.label,
+                        confidence = result.confidence,
+                        modelVersion = result.modelVersion,
+                        diagnosticId = result.id
+                    )
+                )
+                id
+            } else null
+
+            // 4. Mettre à jour le diagnostic avec les références image/prediction
+            if (imageId != null || predictionId != null) {
+                val entity = diagnosticDao.getById(result.id)
+                if (entity != null) {
+                    diagnosticDao.update(
+                        entity.copy(
+                            imageId = imageId,
+                            predictionId = predictionId,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                    )
+                }
+            }
+
+            Log.d(TAG, "💾 Diagnostic sauvegardé en transaction : ${result.id}")
+        }
     }
 
     override suspend fun getDiagnosticById(id: String): DiagnosticResult? {
@@ -88,6 +118,18 @@ class DiagnosticRepositoryImpl(
     override suspend fun updateSyncStatus(id: String, status: SyncStatus) {
         val entity = diagnosticDao.getById(id) ?: return
         diagnosticDao.update(entity.copy(syncStatus = status, updatedAt = System.currentTimeMillis()))
+    }
+
+    override fun observeDiagnosticsByUser(userId: String): Flow<List<DiagnosticResult>> {
+        return diagnosticDao.observeByUser(userId).map { entities ->
+            entities.map { entity -> enrichDiagnostic(entity) }
+        }
+    }
+
+    override suspend fun deleteDiagnostic(id: String) {
+        val entity = diagnosticDao.getById(id) ?: return
+        diagnosticDao.delete(entity)
+        // Les images et prédictions sont supprimées automatiquement via CASCADE
     }
 
     // ==========================================

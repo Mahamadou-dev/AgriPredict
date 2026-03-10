@@ -16,6 +16,7 @@ data class UserEntity(
     val id: String,                 // UUID
     val nom: String,
     val telephone: String,
+    val password: String = "123456", // Mot de passe léger (défaut : 123456)
     val email: String = "",
     val role: String = "",          // ex: "agriculteur", "technicien"
     val commune: String = "",

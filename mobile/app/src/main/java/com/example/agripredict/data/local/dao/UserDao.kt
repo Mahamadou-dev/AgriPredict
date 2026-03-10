@@ -27,6 +27,14 @@ interface UserDao {
     @Query("SELECT * FROM utilisateur_local")
     suspend fun getAll(): List<UserEntity>
 
+    /** Recherche un utilisateur par numéro de téléphone (pour le login) */
+    @Query("SELECT * FROM utilisateur_local WHERE telephone = :telephone")
+    suspend fun getByTelephone(telephone: String): UserEntity?
+
+    /** Vérifie si un téléphone est déjà enregistré */
+    @Query("SELECT COUNT(*) FROM utilisateur_local WHERE telephone = :telephone")
+    suspend fun countByTelephone(telephone: String): Int
+
     /** Observe tous les utilisateurs en temps réel */
     @Query("SELECT * FROM utilisateur_local")
     fun observeAll(): Flow<List<UserEntity>>

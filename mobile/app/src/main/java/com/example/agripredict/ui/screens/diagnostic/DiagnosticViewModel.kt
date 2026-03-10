@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.domain.model.DiagnosticResult
 import com.example.agripredict.domain.usecase.SaveDiagnosticUseCase
 import com.example.agripredict.util.LabelFormatter
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -35,7 +37,8 @@ import java.util.UUID
 class DiagnosticViewModel(
     private val classifier: TFLiteClassifier,
     private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
-    private val appContext: Context
+    private val appContext: Context,
+    private val sessionPreferences: SessionPreferences
 ) : ViewModel() {
 
     companion object {
@@ -141,15 +144,26 @@ class DiagnosticViewModel(
 
     /**
      * Sauvegarde le diagnostic complet dans la base locale Room.
+     *
+     * Vérifie que l'utilisateur est connecté avant de sauvegarder
+     * (nécessaire pour la contrainte FK userId → utilisateur_local.id).
      */
     fun saveDiagnostic() {
         val result = currentResult ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                // Récupérer l'ID de l'utilisateur connecté (obligatoire pour FK)
+                val userId = sessionPreferences.userId.first()
+                if (userId.isEmpty()) {
+                    Log.e(TAG, "❌ Impossible de sauvegarder : aucun utilisateur connecté")
+                    _uiState.value = DiagnosticUiState.Error("Veuillez vous connecter pour sauvegarder")
+                    return@launch
+                }
+
                 val diagnosticResult = DiagnosticResult(
                     id = UUID.randomUUID().toString(),
-                    userId = "local_user", // TODO: Remplacer par l'utilisateur connecté (Phase 6)
+                    userId = userId,
                     date = System.currentTimeMillis(),
                     label = result.label,
                     confidence = result.confidence,
@@ -162,7 +176,7 @@ class DiagnosticViewModel(
 
                 _uiState.value = DiagnosticUiState.Saved
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Erreur sauvegarde : ${e.message}")
+                Log.e(TAG, "❌ Erreur sauvegarde : ${e.message}", e)
                 _uiState.value = DiagnosticUiState.Error(e.message ?: "Erreur de sauvegarde")
             }
         }
@@ -206,12 +220,13 @@ class DiagnosticViewModel(
     class Factory(
         private val classifier: TFLiteClassifier,
         private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
-        private val appContext: Context
+        private val appContext: Context,
+        private val sessionPreferences: SessionPreferences
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DiagnosticViewModel::class.java)) {
-                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext) as T
+                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext, sessionPreferences) as T
             }
             throw IllegalArgumentException("ViewModel inconnu : ${modelClass.name}")
         }

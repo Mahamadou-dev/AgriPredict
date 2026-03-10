@@ -30,5 +30,20 @@ sealed class Screen(val route: String) {
 
     /** Écran paramètres (langue, etc.) */
     data object Settings : Screen("settings")
+
+    /** Écran de connexion */
+    data object Login : Screen("login")
+
+    /** Écran d'inscription */
+    data object Register : Screen("register")
+
+    /** Écran de profil utilisateur */
+    data object Profile : Screen("profile")
+
+    /** Écran de détail d'un diagnostic */
+    data object HistoryDetail : Screen("history_detail/{diagnosticId}") {
+        /** Crée la route avec l'ID du diagnostic */
+        fun createRoute(diagnosticId: String) = "history_detail/$diagnosticId"
+    }
 }
 

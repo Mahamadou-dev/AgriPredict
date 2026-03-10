@@ -4,13 +4,16 @@ import android.content.Context
 import androidx.room.Room
 import com.example.agripredict.data.local.AgriPredictDatabase
 import com.example.agripredict.data.preferences.LanguagePreferences
+import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.data.repository.DiagnosticRepositoryImpl
 import com.example.agripredict.domain.repository.DiagnosticRepository
 import com.example.agripredict.domain.usecase.GetDiagnosticsUseCase
 import com.example.agripredict.domain.usecase.SaveDiagnosticUseCase
 import com.example.agripredict.sync.NetworkChecker
 import com.example.agripredict.sync.SyncManager
+import com.example.agripredict.ui.screens.auth.AuthViewModel
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
+import com.example.agripredict.ui.screens.history.HistoryViewModel
 import com.example.agripredict.util.TFLiteClassifier
 
 /**
@@ -30,7 +33,9 @@ class AppContainer(private val context: Context) {
             context,
             AgriPredictDatabase::class.java,
             "agripredict_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true) // En phase dev, recréer la DB si le schéma change
+            .build()
     }
 
     // === DAOs (un par table) ===
@@ -46,7 +51,7 @@ class AppContainer(private val context: Context) {
 
     // === Repositories ===
     val diagnosticRepository: DiagnosticRepository by lazy {
-        DiagnosticRepositoryImpl(diagnosticDao, imageDao, predictionDao)
+        DiagnosticRepositoryImpl(database, diagnosticDao, imageDao, predictionDao)
     }
 
     // === Use Cases ===
@@ -58,6 +63,7 @@ class AppContainer(private val context: Context) {
 
     // === Préférences ===
     val languagePreferences by lazy { LanguagePreferences(context) }
+    val sessionPreferences by lazy { SessionPreferences(context) }
 
     // === Synchronisation ===
     val networkChecker by lazy { NetworkChecker(context) }
@@ -73,7 +79,28 @@ class AppContainer(private val context: Context) {
         DiagnosticViewModel.Factory(
             classifier = tfliteClassifier,
             saveDiagnosticUseCase = saveDiagnosticUseCase,
-            appContext = context
+            appContext = context,
+            sessionPreferences = sessionPreferences
+        )
+    }
+
+    /**
+     * Factory pour créer le AuthViewModel avec ses dépendances.
+     */
+    val authViewModelFactory by lazy {
+        AuthViewModel.Factory(
+            userDao = userDao,
+            sessionPreferences = sessionPreferences
+        )
+    }
+
+    /**
+     * Factory pour créer le HistoryViewModel avec ses dépendances.
+     */
+    val historyViewModelFactory by lazy {
+        HistoryViewModel.Factory(
+            repository = diagnosticRepository,
+            sessionPreferences = sessionPreferences
         )
     }
 }

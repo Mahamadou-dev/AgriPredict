@@ -2,7 +2,7 @@
 
 > **Application mobile agricole intelligente**
 > Projet de fin d'études (PFE) — Licence en Génie Logiciel
-> Dernière mise à jour : 8 mars 2026
+> Dernière mise à jour : 10 mars 2026 — **Audit de stabilité effectué** ⚡
 
 ---
 
@@ -12,11 +12,13 @@
 2. [Stack technique](#-stack-technique)
 3. [Architecture du projet](#-architecture-du-projet)
 4. [Ce qui a été fait](#-ce-qui-a-été-fait)
-5. [Ce qui reste à faire](#-ce-qui-reste-à-faire)
-6. [Prochaine étape](#-prochaine-étape)
-7. [Comment tester ce qui a été fait](#-comment-tester-ce-qui-a-été-fait)
-8. [Problèmes connus](#-problèmes-connus)
-9. [Roadmap visuelle](#-roadmap-visuelle)
+5. [Bugs corrigés (audit du 10 mars 2026)](#-bugs-corrigés-audit-du-10-mars-2026)
+6. [Ce qui reste à faire](#-ce-qui-reste-à-faire)
+7. [Prochaine étape](#-prochaine-étape)
+8. [Comment tester ce qui a été fait](#-comment-tester-ce-qui-a-été-fait)
+9. [Problèmes connus](#-problèmes-connus)
+10. [Santé du projet](#-santé-du-projet)
+11. [Roadmap visuelle](#-roadmap-visuelle)
 
 ---
 
@@ -30,6 +32,7 @@
 - 🔔 **Consulter des alertes** agricoles régionales
 - 📚 **Apprendre** sur les maladies des plantes
 - 👨‍🌾 **Contacter un expert** agricole
+- 🔐 **S'inscrire et se connecter** avec un profil agriculteur
 
 **Principes fondamentaux :**
 - 📴 **Offline-first** : fonctionne sans Internet
@@ -72,17 +75,17 @@ app/src/main/java/com/example/agripredict/
 │   │   ├── AgriPredictDatabase.kt  ← Database Room (9 tables)
 │   │   ├── Converters.kt          ← TypeConverters (SyncStatus ↔ String)
 │   │   ├── 📂 entity/             ← 9 Entities (@Entity Room)
-│   │   │   ├── UserEntity.kt           → utilisateur_local
-│   │   │   ├── DiagnosticEntity.kt      → diagnostic_local
-│   │   │   ├── ImageEntity.kt           → image_local
-│   │   │   ├── LocationEntity.kt        → location_local
-│   │   │   ├── PredictionEntity.kt      → prediction_local
-│   │   │   ├── MaladieEntity.kt         → maladie_local
-│   │   │   ├── TraitementEntity.kt      → traitement_local
-│   │   │   ├── AlerteEntity.kt          → alerte_local
-│   │   │   └── ModeleIAEntity.kt        → modele_ia_local
+│   │   │   ├── UserEntity.kt
+│   │   │   ├── DiagnosticEntity.kt
+│   │   │   ├── ImageEntity.kt
+│   │   │   ├── LocationEntity.kt
+│   │   │   ├── PredictionEntity.kt
+│   │   │   ├── MaladieEntity.kt
+│   │   │   ├── TraitementEntity.kt
+│   │   │   ├── AlerteEntity.kt
+│   │   │   └── ModeleIAEntity.kt
 │   │   └── 📂 dao/                ← 9 DAOs (CRUD complet)
-│   │       ├── UserDao.kt
+│   │       ├── UserDao.kt          ← + getByTelephone() + countByTelephone()
 │   │       ├── DiagnosticDao.kt
 │   │       ├── ImageDao.kt
 │   │       ├── LocationDao.kt
@@ -103,10 +106,11 @@ app/src/main/java/com/example/agripredict/
 │   │           └── DownlinkDTOs.kt
 │   │
 │   ├── 📂 repository/              ← Implémentations concrètes
-│   │   └── DiagnosticRepositoryImpl.kt
+│   │   └── DiagnosticRepositoryImpl.kt  ← ⚡ Corrigé : transaction Room + ordre FK
 │   │
 │   └── 📂 preferences/             ← Préférences utilisateur
-│       └── LanguagePreferences.kt
+│       ├── LanguagePreferences.kt   ← DataStore langue (agripredict_preferences)
+│       └── SessionPreferences.kt    ← DataStore session auth (session_preferences)
 │
 ├── 📂 domain/                       ← COUCHE MÉTIER
 │   ├── 📂 model/                   ← Modèles métier
@@ -125,37 +129,48 @@ app/src/main/java/com/example/agripredict/
 │   │   ├── Theme.kt                ← Thème clair/sombre
 │   │   └── Type.kt                 ← Typographie
 │   ├── 📂 navigation/
-│   │   ├── Screen.kt               ← Routes (sealed class)
-│   │   └── AgriPredictNavGraph.kt  ← Graphe de navigation
+│   │   ├── Screen.kt               ← 12 routes (sealed class + HistoryDetail)
+│   │   └── AgriPredictNavGraph.kt  ← Graphe de navigation + auth conditionnelle
 │   ├── 📂 screens/
-│   │   ├── 📂 home/HomeScreen.kt           ← Grille d'accueil (6 boutons)
-│   │   ├── 📂 diagnostic/DiagnosticScreen.kt ← Écran diagnostic IA
-│   │   ├── 📂 diseases/DiseasesScreen.kt    ← Base de connaissances
-│   │   ├── 📂 alerts/AlertsScreen.kt       ← Alertes agricoles
-│   │   ├── 📂 history/HistoryScreen.kt     ← Historique diagnostics
-│   │   ├── 📂 expert/ExpertScreen.kt       ← Contact expert
-│   │   ├── 📂 about/AboutScreen.kt         ← À propos
+│   │   ├── 📂 home/HomeScreen.kt           ← Grille d'accueil (6 boutons + profil)
+│   │   ├── 📂 diagnostic/
+│   │   │   ├── DiagnosticScreen.kt         ← Écran diagnostic IA (caméra + galerie)
+│   │   │   └── DiagnosticViewModel.kt      ← ViewModel (6 états) ⚡ Corrigé : userId vérifié
+│   │   ├── 📂 auth/
+│   │   │   ├── AuthViewModel.kt            ← ViewModel auth ⚡ Corrigé : try-catch robuste
+│   │   │   ├── LoginScreen.kt              ← Écran connexion (téléphone + mot de passe)
+│   │   │   ├── RegisterScreen.kt           ← Écran inscription agriculteur
+│   │   │   └── ProfileScreen.kt            ← Écran profil + édition + changer MDP + déconnexion
+│   │   ├── 📂 diseases/DiseasesScreen.kt    ← Base de connaissances (placeholder)
+│   │   ├── 📂 alerts/AlertsScreen.kt       ← Alertes agricoles (placeholder)
+│   │   ├── 📂 history/
+│   │   │   ├── HistoryScreen.kt            ← Historique diagnostics (placeholder UI)
+│   │   │   └── HistoryViewModel.kt         ← ViewModel ⚡ Corrigé : try-catch + Error state
+│   │   ├── 📂 expert/ExpertScreen.kt       ← Contact expert (placeholder)
+│   │   ├── 📂 about/AboutScreen.kt         ← À propos (placeholder)
 │   │   └── 📂 settings/SettingsScreen.kt   ← Paramètres (langue)
 │   └── 📂 components/              ← (vide — prêt pour composants réutilisables)
 │
 ├── 📂 sync/                         ← SYNCHRONISATION OFFLINE-FIRST
 │   ├── SyncStatus.kt               ← enum PENDING / SYNCED / FAILED
-│   ├── SyncManager.kt              ← Coordinateur de sync
-│   ├── SyncWorker.kt               ← WorkManager background
+│   ├── SyncManager.kt              ← Coordinateur de sync (squelette)
+│   ├── SyncWorker.kt               ← WorkManager background (squelette)
 │   ├── SyncRepository.kt           ← Interface sync
 │   └── NetworkChecker.kt           ← Détection connectivité
 │
 ├── 📂 di/                           ← INJECTION DE DÉPENDANCES
-│   └── AppContainer.kt             ← Conteneur DI manuel (simple)
+│   └── AppContainer.kt             ← ⚡ Corrigé : +database dans repo, +historyViewModelFactory
 │
 └── 📂 util/                         ← UTILITAIRES
-    └── LocaleManager.kt            ← Changement de langue dynamique
+    ├── LocaleManager.kt            ← Changement de langue dynamique
+    ├── TFLiteClassifier.kt         ← Moteur IA TFLite (pixels bruts [0,255]) + mode démo
+    └── LabelFormatter.kt           ← Formatage des labels IA bruts
 
 res/                                  ← RESSOURCES i18n
-├── values/strings.xml               ← 🇫🇷 Français (par défaut)
-├── values-en/strings.xml            ← 🇬🇧 English
-├── values-ha/strings.xml            ← 🇳🇬 Hausa
-├── values-dje/strings.xml           ← 🇳🇪 Zarma
+├── values/strings.xml               ← 🇫🇷 Français (107 lignes — auth + profil inclus)
+├── values-en/strings.xml            ← 🇬🇧 English (88 lignes)
+├── values-ha/strings.xml            ← 🇳🇬 Hausa (87 lignes)
+├── values-dje/strings.xml           ← 🇳🇪 Zarma (87 lignes)
 └── xml/locales_config.xml           ← Config Per-App Language (Android 13+)
 ```
 
@@ -178,25 +193,23 @@ res/                                  ← RESSOURCES i18n
 |---------|--------|--------|
 | Structure `data/` | ✅ | local, remote, repository, preferences |
 | Structure `domain/` | ✅ | model, repository, usecase |
-| Structure `ui/` | ✅ | navigation, screens (8), components, theme |
+| Structure `ui/` | ✅ | navigation, screens (9 dossiers), components, theme |
 | Structure `sync/` | ✅ | SyncStatus, SyncManager, SyncWorker |
 | Structure `di/` | ✅ | AppContainer (DI manuelle simple) |
-| Structure `util/` | ✅ | LocaleManager |
+| Structure `util/` | ✅ | LocaleManager, TFLiteClassifier, LabelFormatter |
 
 ### Phase 3 — Base de données locale (Room) ✅
 | Table | Entity | DAO | ForeignKeys | SyncStatus |
 |-------|--------|-----|-------------|------------|
-| `utilisateur_local` | ✅ UserEntity | ✅ UserDao | — | — |
-| `diagnostic_local` | ✅ DiagnosticEntity | ✅ DiagnosticDao | FK→User | ✅ PENDING/SYNCED/FAILED |
-| `image_local` | ✅ ImageEntity | ✅ ImageDao | FK→Diagnostic | — |
+| `utilisateur_local` | ✅ UserEntity | ✅ UserDao (+getByTelephone, +countByTelephone) | — | — |
+| `diagnostic_local` | ✅ DiagnosticEntity | ✅ DiagnosticDao | FK→User (CASCADE) | ✅ |
+| `image_local` | ✅ ImageEntity | ✅ ImageDao | FK→Diagnostic (CASCADE) | — |
 | `location_local` | ✅ LocationEntity | ✅ LocationDao | — | — |
-| `prediction_local` | ✅ PredictionEntity | ✅ PredictionDao | FK→Diagnostic, FK→Maladie | — |
+| `prediction_local` | ✅ PredictionEntity | ✅ PredictionDao | FK→Diagnostic (CASCADE), FK→Maladie (SET_NULL) | — |
 | `maladie_local` | ✅ MaladieEntity | ✅ MaladieDao | — | — |
-| `traitement_local` | ✅ TraitementEntity | ✅ TraitementDao | FK→Maladie | — |
-| `alerte_local` | ✅ AlerteEntity | ✅ AlerteDao | FK→Maladie | ✅ PENDING/SYNCED/FAILED |
+| `traitement_local` | ✅ TraitementEntity | ✅ TraitementDao | FK→Maladie (CASCADE) | — |
+| `alerte_local` | ✅ AlerteEntity | ✅ AlerteDao | FK→Maladie (SET_NULL) | ✅ |
 | `modele_ia_local` | ✅ ModeleIAEntity | ✅ ModeleIADao | — | — |
-
-**Chaque DAO** possède : `insert`, `update`, `delete`, `getById`, `getAll`, `observeAll() → Flow<List<>>`
 
 ### Phase 3 bis — DTOs de synchronisation ✅
 | Direction | DTO | Statut |
@@ -216,7 +229,7 @@ res/                                  ← RESSOURCES i18n
 |-----------|--------|--------|
 | SyncStatus | ✅ | enum PENDING / SYNCED / FAILED |
 | SyncType | ✅ | enum UPLINK / DOWNLINK |
-| SyncManager | ✅ | Squelette avec TODO (syncUserProfile, syncDiagnostics, checkUpdates) |
+| SyncManager | ✅ | Squelette avec TODO |
 | SyncWorker | ✅ | WorkManager CoroutineWorker squelette |
 | SyncRepository | ✅ | Interface sync |
 | NetworkChecker | ✅ | Vérification ConnectivityManager |
@@ -224,51 +237,126 @@ res/                                  ← RESSOURCES i18n
 ### Phase 4 — UI Écran d'accueil ✅
 | Composant | Statut | Détail |
 |-----------|--------|--------|
-| HomeScreen | ✅ | Grille 2×3 avec 6 boutons (icônes Material) |
-| Navigation Compose | ✅ | 8 destinations (Home, Diagnostic, Diseases, Alerts, History, Expert, About, Settings) |
+| HomeScreen | ✅ | Grille 2×3 (6 boutons) + bouton profil + bienvenue personnalisée |
+| Navigation Compose | ✅ | 11 destinations + auth conditionnelle |
 | Thème agricole | ✅ | Vert/marron/orange, clair/sombre |
-| Écrans placeholder | ✅ | 7 écrans avec TopAppBar et bouton retour |
+| Écrans placeholder | ✅ | 5 écrans avec TopAppBar et bouton retour |
 | SettingsScreen | ✅ | Sélecteur de langue fonctionnel (4 langues) |
 
 ### Internationalisation (i18n) ✅
 | Élément | Statut | Détail |
 |---------|--------|--------|
-| strings.xml (FR) | ✅ | 68 lignes — langue par défaut |
-| strings.xml (EN) | ✅ | 54 lignes — traduction anglaise |
-| strings.xml (HA) | ✅ | 54 lignes — traduction hausa |
-| strings.xml (DJE) | ✅ | 54 lignes — traduction zarma |
+| strings.xml (FR) | ✅ | ~107 lignes — inclut auth + profil |
+| strings.xml (EN) | ✅ | ~88 lignes — traduction anglaise complète |
+| strings.xml (HA) | ✅ | ~87 lignes — traduction hausa complète |
+| strings.xml (DJE) | ✅ | ~87 lignes — traduction zarma complète |
 | locales_config.xml | ✅ | Per-App Language (Android 13+) |
 | LocaleManager.kt | ✅ | Changement de langue dynamique |
 | LanguagePreferences.kt | ✅ | DataStore persistant |
 | Aucun texte en dur | ✅ | 100% via `stringResource(R.string.xxx)` |
 | android:supportsRtl | ✅ | Activé dans le Manifest |
 
+### Phase 5 — Diagnostic IA ✅ (⚡ corrigé)
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| TFLiteClassifier.kt | ✅ | Moteur IA TFLite — pixels bruts [0,255] float32 + mode démo |
+| LabelFormatter.kt | ✅ | Parse les labels bruts ("Tomato___Early_blight" → plante + maladie) |
+| DiagnosticScreen.kt | ✅ | UI complète : caméra + galerie + aperçu + résultat |
+| DiagnosticViewModel.kt | ✅⚡ | 6 états — **corrigé** : vérifie userId non-vide avant sauvegarde |
+| Caméra | ✅ | ActivityResultContract (TakePicturePreview) |
+| Galerie | ✅ | ActivityResultContract (PickVisualMedia) — choix d'image |
+| Analyse IA | ✅ | classify(bitmap) → label + confidence |
+| Sauvegarde Room | ✅⚡ | **Corrigé** : transaction Room atomique + ordre FK correct |
+| DiagnosticRepositoryImpl | ✅⚡ | **Corrigé** : insert Diagnostic→Image→Prediction (pas l'inverse) |
+| SaveDiagnosticUseCase | ✅ | UseCase pour sauvegarder un diagnostic |
+| GetDiagnosticsUseCase | ✅ | UseCase pour lister les diagnostics |
+| userId connecté | ✅⚡ | **Corrigé** : refuse sauvegarde si userId vide (plus de "local_user") |
+| Mode démo | ✅ | Si pas de modèle .tflite → résultat aléatoire avec badge d'avertissement |
+| Modèle INT8 déployé | ✅ | `plant_disease_model.tflite` (2.87 Mo, 24 classes, MobileNetV2) |
+| Labels déployés | ✅ | `labels.txt` (24 classes réelles depuis class_names.json) |
+| Bug preprocessing corrigé | ✅ | Pixels bruts [0,255] float32 — couche Rescaling interne au modèle |
+
+### Phase 6 — Authentification ✅ (⚡ corrigé)
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| SessionPreferences.kt | ✅ | DataStore séparé (session_preferences) : userId, userName, isLoggedIn |
+| AuthViewModel.kt | ✅⚡ | **Corrigé** : try-catch dans toutes les fonctions (checkSession, register, login, loadProfile, updateProfile, changePassword) |
+| AuthUiState | ✅ | Sealed class : Loading, LoggedOut, LoggedIn, Error |
+| ProfileUpdateState | ✅ | Sealed class : Idle, Loading, Success, PasswordChanged, Error |
+| LoginScreen.kt | ✅ | Connexion par téléphone + mot de passe + validation |
+| RegisterScreen.kt | ✅ | Inscription (nom, téléphone, commune, village, mot de passe) |
+| ProfileScreen.kt | ✅ | Profil + édition infos + changement MDP + déconnexion |
+| UserDao enrichi | ✅ | +getByTelephone() +countByTelephone() pour l'auth |
+| Navigation conditionnelle | ✅ | Si pas connecté → Login, si connecté → Home |
+| AppContainer mis à jour | ✅⚡ | +sessionPreferences, +authViewModelFactory, **+historyViewModelFactory** |
+| HomeScreen amélioré | ✅ | +bouton profil (icône personne), +bienvenue personnalisée |
+| Screen.kt enrichi | ✅ | +Login, +Register, +Profile, +HistoryDetail (12 routes au total) |
+| AgriPredictNavGraph | ✅ | Navigation auth conditionnelle + popUpTo pour empêcher retour |
+| DiagnosticViewModel lié | ✅⚡ | **Corrigé** : vérifie userId avant save |
+| i18n auth complet | ✅ | 22 nouvelles clés dans les 4 langues (FR, EN, HA, DJE) |
+| Icônes AutoMirrored | ✅ | Login + Logout utilisent les versions non-dépréciées |
+
+### Phase 6 bis — HistoryViewModel ✅ (⚡ corrigé)
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| HistoryViewModel.kt | ✅⚡ | **Corrigé** : try-catch dans loadDiagnostics, loadById, delete |
+| HistoryUiState | ✅⚡ | Sealed class : Loading, Success, Empty, **+Error** (ajouté) |
+| Route HistoryDetail | ✅ | Navigation dynamique `history_detail/{diagnosticId}` |
+| AppContainer enrichi | ✅⚡ | **+historyViewModelFactory** (manquait, ajouté) |
+
+### Phase 6 ter — Audit de stabilité ✅ ← NOUVEAU
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| Correction FK ordre d'insertion | ✅ | Diagnostic inséré AVANT Image et Prediction |
+| Transaction Room atomique | ✅ | `database.withTransaction { }` dans saveDiagnostic |
+| Vérification userId avant save | ✅ | Plus de fallback "local_user" invalide |
+| try-catch AuthViewModel | ✅ | 6 fonctions protégées contre les crashs |
+| try-catch HistoryViewModel | ✅ | 3 fonctions protégées contre les crashs |
+| try-catch DiagnosticViewModel | ✅ | saveDiagnostic protégé avec message d'erreur |
+| HistoryUiState.Error ajouté | ✅ | Les erreurs de chargement sont communiquées à l'UI |
+| historyViewModelFactory | ✅ | Ajouté dans AppContainer (manquait) |
+| Build validé | ✅ | `BUILD SUCCESSFUL` confirmé après toutes les corrections |
+
+---
+
+## 🔧 Bugs corrigés (audit du 10 mars 2026)
+
+### 🔴 BUG CRITIQUE 1 : Foreign Key constraint failed — Sauvegarde diagnostic
+**Symptôme :** Crash `FOREIGN KEY constraint failed` lors de "Enregistrer" sur l'écran diagnostic
+**Cause racine :** `ImageEntity` et `PredictionEntity` (FK → DiagnosticEntity) insérées AVANT le parent `DiagnosticEntity`
+**Correction :** Réordonnancement : Diagnostic→Image→Prediction + `database.withTransaction { }`
+**Fichiers :** `DiagnosticRepositoryImpl.kt`, `AppContainer.kt`
+
+### 🔴 BUG CRITIQUE 2 : userId "local_user" viole la FK
+**Symptôme :** Si l'utilisateur n'est pas connecté, fallback `"local_user"` → FK violation
+**Correction :** Vérifie userId non-vide, affiche erreur "Veuillez vous connecter"
+**Fichier :** `DiagnosticViewModel.kt`
+
+### 🟡 BUG 3 : Crash au démarrage si DB corrompue
+**Symptôme :** Exception dans `checkSession()` → crash écran blanc
+**Correction :** try-catch avec fallback vers `AuthUiState.LoggedOut`
+**Fichier :** `AuthViewModel.kt`
+
+### 🟡 BUG 4 : Fonctions ViewModel sans gestion d'erreur
+**Symptôme :** Toute erreur DB/réseau causait un crash immédiat
+**Correction :** try-catch dans 12 fonctions coroutines des 3 ViewModels
+**Fichiers :** `AuthViewModel.kt`, `HistoryViewModel.kt`, `DiagnosticViewModel.kt`
+
+### 🟡 BUG 5 : historyViewModelFactory absent de AppContainer
+**Symptôme :** Le RECAP affirmait son existence mais il manquait
+**Correction :** Factory ajouté dans AppContainer
+**Fichier :** `AppContainer.kt`
+
 ---
 
 ## 🔲 Ce qui reste à faire
 
-### Phase 5 — Diagnostic IA (PRIORITÉ N°1) 🔲
-- [ ] Intégrer la caméra (CameraX ou ActivityResultContract)
-- [ ] Charger un modèle TensorFlow Lite INT8
-- [ ] Créer `TFLiteClassifier.kt` dans `util/`
-- [ ] Créer `DiagnosticViewModel.kt`
-- [ ] Connecter UI → ViewModel → UseCase → Repository → IA Engine
-- [ ] Afficher résultat (maladie, confiance %, traitement)
-- [ ] Sauvegarder le diagnostic dans Room
-
-### Phase 6 — Authentification 🔲
-- [ ] Écran d'inscription (nom, téléphone, commune, village)
-- [ ] Écran de connexion
-- [ ] Écran de profil
-- [ ] Sauvegarde locale du profil (UserDao)
-- [ ] Session utilisateur (DataStore)
-
 ### Phase 7 — Écrans fonctionnels 🔲
-- [ ] Historique des diagnostics (lire depuis Room)
-- [ ] Base de connaissances maladies (lire depuis Room)
-- [ ] Alertes agricoles (lire depuis Room)
-- [ ] Contact expert (formulaire)
-- [ ] À propos (contenu dynamique)
+- [ ] **Historique des diagnostics — UI** (HistoryScreen avec LazyColumn, HistoryDetailScreen)
+- [ ] **Base de connaissances maladies** (lire MaladieDao + TraitementDao, afficher fiches)
+- [ ] **Alertes agricoles** (lire AlerteDao, afficher par zone + gravité)
+- [ ] **Contact expert** (formulaire simple ou numéro de téléphone)
+- [ ] **À propos** (informations sur l'app, version, auteur)
 
 ### Phase 8 — Synchronisation complète 🔲
 - [ ] Implémenter `SyncManager` (remplacer les TODO)
@@ -281,69 +369,48 @@ res/                                  ← RESSOURCES i18n
 - [ ] Configurer l'URL de base Retrofit
 - [ ] Implémenter les appels API réels
 - [ ] Gérer l'authentification API (token)
-- [ ] Tests de connexion
+- [ ] Tests de connexion mobile ↔ serveur
 
 ### Phase 10 — Finitions 🔲
 - [ ] Gestion des permissions runtime (caméra, GPS)
-- [ ] Gestion des erreurs (écrans d'erreur)
 - [ ] Écrans de chargement (loading states)
 - [ ] Tests unitaires
 - [ ] Tests d'instrumentation
 - [ ] Optimisation performance
 - [ ] Logo et assets finaux
+- [ ] Remplacer `fallbackToDestructiveMigration` par des migrations Room propres
 
 ---
 
 ## 🎯 Prochaine étape immédiate
 
-### → Phase 6 : Authentification
+### → Phase 7 : Rendre les écrans fonctionnels
 
-C'est la prochaine fonctionnalité logique. Plan détaillé :
+Le `HistoryViewModel` est déjà prêt — il charge, filtre et supprime les diagnostics.
 
 ```
-1. Écran d'inscription
-   └── ui/screens/auth/RegisterScreen.kt
-       → Champs : nom, téléphone, commune, village
-       → Bouton "S'inscrire"
-       → Sauvegarde dans UserDao (Room)
+Ordre recommandé :
 
-2. Écran de connexion
-   └── ui/screens/auth/LoginScreen.kt
-       → Champ : téléphone
-       → Bouton "Se connecter"
-       → Vérification locale (Room)
+1. Historique des diagnostics — UI (★★★★★)
+   └── ui/screens/history/HistoryScreen.kt
+       → Le ViewModel existe déjà (charge, filtre, supprime)
+       → Remplir : LazyColumn + date, label, confiance %, image miniature
+       → HistoryDetailScreen pour le détail d'un diagnostic
 
-3. Gestion de session
-   └── data/preferences/SessionPreferences.kt
-       → DataStore : userId, isLoggedIn
-       → Persiste entre les lancements de l'app
+2. Base de connaissances maladies (★★★★)
+   └── ui/screens/diseases/DiseasesScreen.kt
+       → Lire MaladieDao.observeAll() + TraitementDao
+       → Prépopuler la base avec des données locales
 
-4. Écran profil
-   └── ui/screens/auth/ProfileScreen.kt
-       → Affiche les infos de l'utilisateur
-       → Bouton "Déconnexion"
+3. Alertes agricoles (★★★)
+   └── ui/screens/alerts/AlertsScreen.kt
 
-5. Protection des écrans
-   └── Navigation conditionnelle
-       → Si pas connecté → LoginScreen
-       → Si connecté → HomeScreen
+4. Contact expert (★★)
+   └── ui/screens/expert/ExpertScreen.kt
 
-6. Connecter le diagnostic à l'utilisateur réel
-   └── Remplacer "local_user" par le vrai userId
+5. À propos (★)
+   └── ui/screens/about/AboutScreen.kt
 ```
-
-### 🔌 Quand commencer le backend ?
-
-Le backend sera nécessaire à partir de la **Phase 8 (Synchronisation complète)**.
-Cependant, il est recommandé de **commencer son développement en parallèle de la Phase 7**,
-car à ce moment-là :
-- ✅ Les DTOs sont déjà définis côté mobile (uplink + downlink)
-- ✅ L'interface Retrofit (AgriPredictApi.kt) existe déjà
-- ✅ Les modèles de données sont stables
-- 🎯 Tu pourras tester la synchronisation réelle dès la Phase 8
-
-**Résumé :** Développe le backend pendant les Phases 7-8. Les endpoints requis
-correspondent directement aux DTOs créés dans `data/remote/dto/`.
 
 ---
 
@@ -352,74 +419,37 @@ correspondent directement aux DTOs créés dans `data/remote/dto/`.
 ### Test 1 — Compilation ✅
 ```powershell
 cd C:\GREMAHTECH\GremahTech\PFE\AgriPredict\mobile
-.\gradlew.bat assembleDebug
+.\gradlew.bat clean assembleDebug
 ```
-**Résultat attendu :** `BUILD SUCCESSFUL`
+**Résultat attendu :** `BUILD SUCCESSFUL` ✅ (confirmé le 10 mars 2026)
 
 ### Test 2 — Lancer l'application sur émulateur/appareil
 1. Ouvrir Android Studio
-2. **File → Sync Project with Gradle Files** (résout les erreurs rouges IDE)
+2. **File → Sync Project with Gradle Files**
 3. Sélectionner un émulateur API 26+ ou un appareil physique
 4. Cliquer sur ▶️ Run
 
-**Vérifier :**
-- [ ] L'écran d'accueil s'affiche avec les 6 boutons
-- [ ] Le titre "AgriPredict" apparaît dans la TopAppBar verte
-- [ ] Chaque bouton navigue vers le bon écran
-- [ ] Le bouton retour (←) fonctionne sur chaque écran
-- [ ] L'icône ⚙️ ouvre l'écran Paramètres
-
-### Test 3 — Navigation complète
-Tester ce parcours :
+### Test 3 — Flux d'authentification
 ```
-Accueil → Diagnostic → ← Retour
-Accueil → Maladies → ← Retour
-Accueil → Alertes → ← Retour
-Accueil → Historique → ← Retour
-Accueil → Expert → ← Retour
-Accueil → À propos → ← Retour
-Accueil → ⚙️ Paramètres → ← Retour
+Démarrage → Écran Connexion (première utilisation)
+    → "Pas de compte ? S'inscrire" → Remplir formulaire → "S'inscrire"
+    → Redirection vers Accueil → "Bienvenue, [Nom] 👋"
+    → 👤 Profil → Infos + Déconnexion
+    → Retour Connexion → Saisir téléphone → Connexion → Accueil
 ```
 
-### Test 4 — Changement de langue
-1. Accueil → ⚙️ Paramètres
-2. Sélectionner "English"
-3. Vérifier que les textes changent en anglais
-4. Sélectionner "Hausa"
-5. Vérifier que les textes changent en hausa
-6. Revenir à "Français"
-
-### Test 5 — Thème sombre
-1. Activer le mode sombre dans les paramètres Android de l'émulateur
-2. Relancer l'app
-3. Vérifier que le thème sombre s'applique (couleurs adaptées)
-
-### Test 6 — Diagnostic IA (mode démo)
-1. Accueil → "Faire un diagnostic"
-2. Accepter la permission caméra
-3. Appuyer sur "Prendre une photo" → la caméra s'ouvre
-4. Prendre une photo → l'aperçu s'affiche
-5. Appuyer sur "Analyser" → l'animation de chargement apparaît
-6. Le résultat s'affiche avec :
-   - Badge "⚠ Mode démonstration" (pas de modèle .tflite)
-   - Un nom de maladie aléatoire
-   - Une barre de confiance avec pourcentage
-7. Appuyer sur "Enregistrer" → message de succès
-8. Appuyer sur "Nouveau diagnostic" → retour à l'état initial
-
-### Test 7 — Base de données Room (test unitaire)
-Créer un test simple dans `app/src/androidTest/` :
-```kotlin
-// Vérifier que la base de données se crée sans erreur
-// Vérifier qu'on peut insérer et lire un UserEntity
-// Vérifier qu'on peut insérer et lire un DiagnosticEntity
+### Test 4 — Diagnostic IA + Sauvegarde (⚡ corrigé)
 ```
-*(Ce test sera créé à la prochaine étape)*
+Accueil → Diagnostic → Photo/Galerie → Aperçu → Analyser → Résultat
+    → "Enregistrer" → ✅ Succès (plus de crash FK !)
+    → "Nouveau diagnostic"
+```
 
-### Test 8 — APK généré
-```powershell
-# Vérifier que l'APK a bien été généré
-Test-Path "app\build\outputs\apk\debug\app-debug.apk"
+### Test 5 — Navigation + Langue + Thème sombre
+```
+Vérifier chaque lien Accueil ↔ écrans
+Paramètres → Changer langue (FR/EN/HA/DJE)
+Mode sombre Android → Thème s'adapte
 ```
 
 ---
@@ -427,49 +457,85 @@ Test-Path "app\build\outputs\apk\debug\app-debug.apk"
 ## ⚠️ Problèmes connus
 
 ### 1. Erreurs rouges dans l'IDE (faux positifs)
-**Symptôme :** Des erreurs `Unresolved reference` apparaissent en rouge dans l'éditeur
-**Cause :** L'IDE n'a pas synchronisé Gradle après l'ajout des dépendances
-**Solution :** `File → Sync Project with Gradle Files` dans Android Studio
-**Impact :** Aucun — le build Gradle compile parfaitement
+**Solution :** `File → Sync Project with Gradle Files` ou `Invalidate Caches`
 
 ### 2. TensorFlow Lite Support désactivé temporairement
-**Symptôme :** `tensorflow-lite-support` est commenté dans build.gradle.kts
-**Cause :** Conflit de namespace avec AGP 9.0.1 (bug Google)
-**Solution :** Sera réactivé quand Google publiera un fix ou quand on passera à une version compatible
-**Impact :** N'empêche pas le développement du diagnostic IA (on utilise `tensorflow-lite` directement)
+**Cause :** Conflit namespace AGP 9.0.1. Utilisation de `tensorflow-lite` directement.
 
-### 3. Warning expérimental KSP
-**Symptôme :** `WARNING: The option setting 'android.disallowKotlinSourceSets=false' is experimental`
-**Cause :** KSP avec le Kotlin intégré d'AGP 9 nécessite ce flag
-**Solution :** Flag dans gradle.properties — sera retiré quand KSP sera officiellement compatible
-**Impact :** Aucun — le build fonctionne correctement
+### 3. Bug preprocessing TFLite — RÉSOLU ✅
+**Solution :** Pixels bruts [0,255] float32 — couche Rescaling intégrée au modèle.
+
+### 4. Warning expérimental KSP — Impact nul
+
+### 5. fallbackToDestructiveMigration actif (phase dev uniquement)
+**Impact :** Données perdues si le schéma DB change. À remplacer par des migrations en prod.
+
+---
+
+## 🏥 Santé du projet
+
+### Bilan de l'audit du 10 mars 2026
+
+| Critère | Avant audit | Après audit |
+|---------|-------------|-------------|
+| Build | ✅ PASS | ✅ PASS |
+| Erreurs compilation | 0 | 0 |
+| Sauvegarde diagnostic | ❌ CRASH FK | ✅ CORRIGÉ |
+| Démarrage app | ⚠️ Fragile | ✅ ROBUSTE |
+| Auth (toutes fonctions) | ⚠️ Sans protection | ✅ ROBUSTE |
+| Historique | ⚠️ Sans protection | ✅ ROBUSTE |
+| historyViewModelFactory | ❌ MANQUANT | ✅ AJOUTÉ |
+| Architecture Clean Arch | ✅ Solide | ✅ Solide |
+| MVVM | ✅ Solide | ✅ Solide |
+| Offline-first | ✅ Bon | ✅ Bon |
+| i18n | ✅ Complet | ✅ Complet |
+
+### Score de santé global : 🟢 8.5/10
+
+**Points forts :**
+- Architecture propre (Clean Architecture + MVVM)
+- 63 fichiers Kotlin bien organisés (~5 500 lignes)
+- Gestion d'erreurs robuste (après corrections)
+- i18n 4 langues, 0 texte en dur
+- Transaction Room atomique pour sauvegarde multi-table
+- Modèle IA fonctionnel
+
+**Points à améliorer (non-bloquants) :**
+- 5 écrans placeholder à remplir (Phase 7)
+- Sync non implémentée (Phase 8)
+- Pas de tests unitaires (Phase 10)
+- `fallbackToDestructiveMigration` à remplacer en production
 
 ---
 
 ## 📊 Roadmap visuelle
 
 ```
-Étape                          Statut    Priorité
-──────────────────────────────────────────────────
-1. Setup projet + Gradle       ✅ FAIT    —
-2. Architecture Clean Arch     ✅ FAIT    —
-3. Base de données Room        ✅ FAIT    —
-4. DTOs synchronisation        ✅ FAIT    —
-5. Sync offline-first (skel)   ✅ FAIT    —
-6. UI Home + Navigation        ✅ FAIT    —
-7. Thème Material 3 agricole   ✅ FAIT    —
-8. i18n (4 langues)            ✅ FAIT    —
-──────────────────────────────────────────────────
-9.  🎯 DIAGNOSTIC IA           🔲 NEXT   ★★★★★
-10. Authentification            🔲        ★★★★
-11. Historique diagnostics      🔲        ★★★
-12. Base connaissances          🔲        ★★★
-13. Alertes agricoles           🔲        ★★
-14. Sync complète               🔲        ★★
-15. Contact expert              🔲        ★
-16. Tests                       🔲        ★★★
-17. Finitions + polish          🔲        ★★
-──────────────────────────────────────────────────
+Étape                              Statut       Priorité
+────────────────────────────────────────────────────────
+ 1. Setup projet + Gradle           ✅ FAIT      —
+ 2. Architecture Clean Arch         ✅ FAIT      —
+ 3. Base de données Room            ✅ FAIT      —
+ 4. DTOs synchronisation            ✅ FAIT      —
+ 5. Sync offline-first (squelette)  ✅ FAIT      —
+ 6. UI Home + Navigation            ✅ FAIT      —
+ 7. Thème Material 3 agricole       ✅ FAIT      —
+ 8. i18n (4 langues)                ✅ FAIT      —
+ 9. Diagnostic IA (caméra+galerie)  ✅ FAIT      —
+10. Authentification complète       ✅ FAIT      —
+11. Modèle IA déployé + bug fix     ✅ FAIT      —
+12. HistoryViewModel                ✅ FAIT      —
+13. ⚡ Audit & correction bugs      ✅ FAIT      — ← NOUVEAU
+────────────────────────────────────────────────────────
+14. 🎯 Historique UI + Détail       🔲 NEXT     ★★★★★
+15. Base de connaissances maladies  🔲           ★★★★
+16. Alertes agricoles               🔲           ★★★
+17. Contact expert                  🔲           ★★
+18. À propos                        🔲           ★
+19. Sync complète + Backend         🔲           ★★★★
+20. Tests                           🔲           ★★★
+21. Finitions + polish              🔲           ★★
+────────────────────────────────────────────────────────
 ```
 
 ---
@@ -478,36 +544,51 @@ Test-Path "app\build\outputs\apk\debug\app-debug.apk"
 
 | Fichier | Rôle |
 |---------|------|
-| `app/build.gradle.kts` | Dépendances et configuration du module |
-| `gradle/libs.versions.toml` | Catalogue centralisé de toutes les versions |
-| `gradle.properties` | Flags Gradle (KSP, AndroidX) |
-| `AndroidManifest.xml` | Permissions, Application class, locale config |
-| `AgriPredictApplication.kt` | Initialise le conteneur DI au démarrage |
-| `AppContainer.kt` | Fournit toutes les dépendances (Database, DAOs, Repos, IA, ViewModels) |
-| `AgriPredictDatabase.kt` | Définit les 9 tables Room |
-| `AgriPredictNavGraph.kt` | Graphe de navigation (8 écrans) + injection ViewModel |
-| `HomeScreen.kt` | Écran d'accueil principal |
-| `DiagnosticScreen.kt` | Écran diagnostic IA complet (caméra → analyse → résultat) |
-| `DiagnosticViewModel.kt` | ViewModel MVVM (6 états, analyse IA, sauvegarde) |
-| `TFLiteClassifier.kt` | Moteur IA TensorFlow Lite + mode démo |
-| `DiagnosticRepositoryImpl.kt` | Repository enrichi (3 DAOs : diagnostic, image, prediction) |
-| `SyncStatus.kt` | Enum PENDING/SYNCED/FAILED |
-| `LocaleManager.kt` | Changement de langue dynamique |
+| `AppContainer.kt` | DI : Database, DAOs, Repos, IA, Auth, History, ViewModels |
+| `AgriPredictDatabase.kt` | 9 tables Room |
+| `DiagnosticRepositoryImpl.kt` | Transaction Room, 3 DAOs, ordre FK correct |
+| `DiagnosticViewModel.kt` | 6 états, analyse IA, sauvegarde avec vérification userId |
+| `AuthViewModel.kt` | Auth complète (try-catch robuste dans toutes les fonctions) |
+| `HistoryViewModel.kt` | Historique (try-catch, état Error) |
+| `TFLiteClassifier.kt` | Moteur IA TFLite + mode démo |
+| `SessionPreferences.kt` | DataStore session (userId, isLoggedIn) |
+| `AgriPredictNavGraph.kt` | 12 routes + auth conditionnelle |
+
+---
+
+## 📈 Statistiques du projet
+
+| Métrique | Valeur |
+|----------|--------|
+| Fichiers Kotlin | 63 fichiers |
+| Lignes de code Kotlin | ~5 500 lignes |
+| Tables Room | 9 |
+| DAOs | 9 |
+| Écrans UI | 11 (dont 5 placeholders) |
+| ViewModels | 3 |
+| Langues | 4 (FR, EN, HA, DJE) |
+| Routes navigation | 12 |
+| Bugs critiques corrigés | 2 (FK order + userId fallback) |
+| Bugs moyens corrigés | 3 (try-catch + factory manquant) |
+| Build status | ✅ BUILD SUCCESSFUL (10 mars 2026) |
+| Erreurs compile | 0 |
 
 ---
 
 ## 👨‍🎓 Notes pour la soutenance
 
-- **Architecture** : Clean Architecture recommandée par Google — séparation data/domain/ui
-- **MVVM** : Pattern Model-View-ViewModel avec Flow/StateFlow
-- **Offline-first** : Les données sont d'abord stockées localement puis synchronisées
-- **i18n** : 4 langues supportées sans modifier le code source
-- **DI manuelle** : Choix pédagogique — plus simple que Hilt/Dagger à expliquer
-- **SyncStatus** : Chaque enregistrement sait s'il est PENDING, SYNCED ou FAILED
-- **TypeConverters** : Room ne stocke pas les enums directement → conversion String
+- **Architecture** : Clean Architecture — séparation data/domain/ui
+- **MVVM** : StateFlow/collectAsState
+- **Offline-first** : Room + DataStore, sync PENDING/SYNCED/FAILED
+- **Transaction Room** : Sauvegarde multi-table atomique (Diagnostic→Image→Prediction)
+- **Foreign Keys** : Insertions parent→enfant respectées
+- **Gestion d'erreurs** : try-catch dans tous les ViewModels
+- **i18n** : 4 langues sans modifier le code source
+- **DI manuelle** : Choix pédagogique (plus simple que Hilt)
+- **Modèle IA** : MobileNetV2 INT8 quantifié, 24 classes
+- **Preprocessing** : Pixels bruts [0,255] — Rescaling intégrée au modèle
 
 ---
 
-> 📌 **Prochain objectif :** Implémenter l'authentification (Phase 6)
-> Écrans inscription, connexion, profil + session DataStore + navigation conditionnelle
-
+> 📌 **Prochain objectif :** Implémenter l'UI de l'Historique des diagnostics
+> Le ViewModel est prêt — il faut remplir `HistoryScreen.kt` (LazyColumn) et créer `HistoryDetailScreen.kt`

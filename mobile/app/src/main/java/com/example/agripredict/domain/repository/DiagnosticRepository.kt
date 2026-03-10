@@ -26,5 +26,11 @@ interface DiagnosticRepository {
 
     /** Met à jour le statut de synchronisation d'un diagnostic */
     suspend fun updateSyncStatus(id: String, status: SyncStatus)
+
+    /** Observe les diagnostics d'un utilisateur */
+    fun observeDiagnosticsByUser(userId: String): Flow<List<DiagnosticResult>>
+
+    /** Supprime un diagnostic et ses données associées */
+    suspend fun deleteDiagnostic(id: String)
 }
 
