@@ -116,6 +116,87 @@
     <string name="sync_success">Cimandi boryo</string>
     <string name="sync_error">Cimandi firka</string>
     <string name="sync_offline">Enternet kulu si no</string>
+
+    <!-- === Duwey === -->
+    <string name="diseases_search">Doori ceeci…</string>
+    <string name="diseases_empty">Doori kulu mana duwandi</string>
+    <string name="diseases_empty_subtitle">Bay bayey kanjey goo koonu</string>
+    <string name="diseases_treatments">Safarey</string>
+
+    <!-- === Bayrandi === -->
+    <string name="alerts_high">Beerey</string>
+    <string name="alerts_medium">Ga here</string>
+    <string name="alerts_low">Kayna</string>
+    <string name="alerts_empty">Bayrandi kulu si no</string>
+    <string name="alerts_empty_subtitle">Bayrandi kulu si no ni laabu ra</string>
+    <string name="alerts_expires">A ga ben %1$s</string>
+    <string name="alerts_summary">Bayrandi taakwa</string>
+
+    <!-- === Bay boro === -->
+    <string name="expert_title">Bay boro se sala&#x014B;</string>
+    <string name="expert_subtitle">Laakari haw gaabu ka&#x014B; bay boro do</string>
+    <string name="expert_quick_contact">Garaw sala&#x014B;</string>
+    <string name="expert_call">Ce</string>
+    <string name="expert_email">Imel</string>
+    <string name="expert_form_title">Baata donton</string>
+    <string name="expert_subject">Batu</string>
+    <string name="expert_message">Ni goy firka bayyanka…</string>
+    <string name="expert_send">Donton</string>
+    <string name="expert_message_sent">Baata dontoney!</string>
+    <string name="expert_tip">Laakari: ni habu duwandiko foto kaa Ceeci bay ra jina ni ma bay boro se sala&#x014B;. Woo ga gaa nda doori duwandi.</string>
+
+    <!-- === Expert — Annuaire === -->
+    <string name="expert_directory_title">📞 Bay borey kundin</string>
+    <string name="expert_directory_subtitle">Cala wala SMS donton hasaraw</string>
+    <string name="expert_call_action">📞 Cala</string>
+    <string name="expert_sms_action">💬 SMS</string>
+    <string name="expert_specialty">Bayyaney</string>
+    <string name="expert_zone">Laabu</string>
+    <string name="expert_or_send_message">Wala baata donton nda imel</string>
+
+    <!-- === Alertes — Tri === -->
+    <string name="alerts_sort_by">Margana nda</string>
+    <string name="alerts_sort_date">Han</string>
+    <string name="alerts_sort_gravity">Beeray</string>
+    <string name="alerts_sort_zone">Laabu</string>
+    <string name="alerts_filter_all">Kulu</string>
+
+    <!-- === Duwey — Categories === -->
+    <string name="diseases_all_plants">Kulu</string>
+    <string name="diseases_category_title">Suubey</string>
+    <string name="diseases_total">Duwey %d</string>
+    <string name="diseases_description_title">📋 Bayyaney</string>
+    <string name="diseases_symptoms_title">🔍 Tamsey</string>
+
+    <!-- === Ceeci — Saafari === -->
+    <string name="diagnostic_treatment_title">💊 Saafari kaŋ ga hima</string>
+    <string name="diagnostic_treatment_subtitle">Ir bay feeri boŋ</string>
+    <string name="diagnostic_disease_info">📋 Doori woo boŋ</string>
+    <string name="diagnostic_learn_more">Bay ka tonton</string>
+    <string name="diagnostic_no_treatment">Saafari kulu si no</string>
+    <string name="diagnostic_healthy_advice">🌿 Gaakoy laakari se</string>
+
+    <!-- === Boro bo&#x014B; === -->
+    <string name="about_description">Teelifon goy habu duwey ceeci bay ra nda AI, gaabu izey se Goorubi Faaba Afirik ra.</string>
+    <string name="about_project_title">Goy</string>
+    <string name="about_project_type">Mohon</string>
+    <string name="about_project_type_value">Caw goyyan goy (PFE)</string>
+    <string name="about_university">Almadirsa beero</string>
+    <string name="about_university_value">Abdou Moumouni Almadirsa Niamey</string>
+    <string name="about_year">Caw shekaara</string>
+    <string name="about_author_title">Teeko</string>
+    <string name="about_author">Almaajiiri</string>
+    <string name="about_author_value">GREMAH Mahamadou</string>
+    <string name="about_supervisor">Gaakoy</string>
+    <string name="about_supervisor_value">A ga bayyanka</string>
+    <string name="about_tech_title">Fasaha</string>
+    <string name="about_ai_title">AI bay</string>
+    <string name="about_model">Gomni</string>
+    <string name="about_classes">Duwey duwandey</string>
+    <string name="about_crops">Habu saarey</string>
+    <string name="about_crops_value">Bantaari, Haynii, Toonka, Doori, Tomates</string>
+    <string name="about_accuracy">Cimi hinka</string>
+    <string name="about_footer">Teekandi nda ❤ Niijar ra — 2025</string>
     <plurals name="diseases_detected_count">
         <item quantity="one">Doori %d duwandi</item>
         <item quantity="other">Duwey %d duwandi</item>

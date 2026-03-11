@@ -108,6 +108,14 @@
     <string name="save">Enregistrer</string>
     <string name="back">Retour</string>
 
+    <!-- === Diagnostic — Traitements recommandés === -->
+    <string name="diagnostic_treatment_title">💊 Traitement recommandé</string>
+    <string name="diagnostic_treatment_subtitle">Basé sur notre base de connaissances</string>
+    <string name="diagnostic_disease_info">📋 À propos de cette maladie</string>
+    <string name="diagnostic_learn_more">En savoir plus</string>
+    <string name="diagnostic_no_treatment">Aucun traitement disponible</string>
+    <string name="diagnostic_healthy_advice">🌿 Conseils de prévention</string>
+
     <!-- === Historique === -->
     <string name="history_title">Historique des diagnostics</string>
     <string name="history_empty">Aucun diagnostic enregistré</string>
@@ -135,6 +143,79 @@
     <string name="sync_success">Synchronisation réussie</string>
     <string name="sync_error">Erreur de synchronisation</string>
     <string name="sync_offline">Mode hors ligne</string>
+
+    <!-- === Maladies (Base de connaissances) === -->
+    <string name="diseases_search">Rechercher une maladie…</string>
+    <string name="diseases_empty">Aucune maladie trouvée</string>
+    <string name="diseases_empty_subtitle">La base de connaissances est vide</string>
+    <string name="diseases_treatments">Traitements</string>
+
+    <!-- === Alertes === -->
+    <string name="alerts_high">Élevée</string>
+    <string name="alerts_medium">Moyenne</string>
+    <string name="alerts_low">Faible</string>
+    <string name="alerts_empty">Aucune alerte</string>
+    <string name="alerts_empty_subtitle">Pas d\'alerte en cours dans votre zone</string>
+    <string name="alerts_expires">Expire le %1$s</string>
+    <string name="alerts_summary">Résumé des alertes</string>
+
+    <!-- === Expert === -->
+    <string name="expert_title">Consulter un expert</string>
+    <string name="expert_subtitle">Obtenez des conseils personnalisés d\'un agronome qualifié</string>
+    <string name="expert_quick_contact">Contact rapide</string>
+    <string name="expert_call">Appeler</string>
+    <string name="expert_email">Email</string>
+    <string name="expert_form_title">Envoyer un message</string>
+    <string name="expert_subject">Sujet</string>
+    <string name="expert_message">Décrivez votre problème…</string>
+    <string name="expert_send">Envoyer</string>
+    <string name="expert_message_sent">Message envoyé !</string>
+    <string name="expert_tip">Astuce : joignez une photo de votre plante malade depuis l\'écran Diagnostic avant de contacter l\'expert. Cela facilitera le diagnostic à distance.</string>
+
+    <!-- === Expert — Annuaire === -->
+    <string name="expert_directory_title">📞 Annuaire des experts</string>
+    <string name="expert_directory_subtitle">Appelez ou envoyez un SMS directement</string>
+    <string name="expert_call_action">📞 Appeler</string>
+    <string name="expert_sms_action">💬 SMS</string>
+    <string name="expert_specialty">Spécialité</string>
+    <string name="expert_zone">Zone</string>
+    <string name="expert_or_send_message">Ou envoyer un message par email</string>
+
+    <!-- === Alertes — Tri et filtre === -->
+    <string name="alerts_sort_by">Trier par</string>
+    <string name="alerts_sort_date">Date</string>
+    <string name="alerts_sort_gravity">Gravité</string>
+    <string name="alerts_sort_zone">Zone</string>
+    <string name="alerts_filter_all">Toutes</string>
+
+    <!-- === Maladies — Catégories === -->
+    <string name="diseases_all_plants">Toutes</string>
+    <string name="diseases_category_title">Catégories</string>
+    <string name="diseases_total">%d maladies</string>
+    <string name="diseases_description_title">📋 Description</string>
+    <string name="diseases_symptoms_title">🔍 Symptômes</string>
+
+    <!-- === À propos === -->
+    <string name="about_description">Application mobile de diagnostic des maladies des plantes par intelligence artificielle, conçue pour les agriculteurs d\'Afrique de l\'Ouest.</string>
+    <string name="about_project_title">Projet</string>
+    <string name="about_project_type">Type</string>
+    <string name="about_project_type_value">Projet de Fin d\'Études (PFE)</string>
+    <string name="about_university">Université</string>
+    <string name="about_university_value">Université Abdou Moumouni de Niamey</string>
+    <string name="about_year">Année académique</string>
+    <string name="about_author_title">Auteur</string>
+    <string name="about_author">Étudiant</string>
+    <string name="about_author_value">GREMAH Mahamadou</string>
+    <string name="about_supervisor">Encadrant</string>
+    <string name="about_supervisor_value">À préciser</string>
+    <string name="about_tech_title">Technologies</string>
+    <string name="about_ai_title">Intelligence artificielle</string>
+    <string name="about_model">Modèle</string>
+    <string name="about_classes">Classes détectées</string>
+    <string name="about_crops">Cultures</string>
+    <string name="about_crops_value">Manioc, Maïs, Poivron, Pomme de terre, Tomate</string>
+    <string name="about_accuracy">Précision</string>
+    <string name="about_footer">Développé avec ❤ au Niger — 2025</string>
 
     <!-- === Pluriels === -->
     <plurals name="diseases_detected_count">

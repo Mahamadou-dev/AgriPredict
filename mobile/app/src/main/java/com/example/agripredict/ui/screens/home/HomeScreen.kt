@@ -1,5 +1,9 @@
 package com.example.agripredict.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -11,6 +15,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -143,6 +152,10 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
+        // Animation d'apparition
+        var isVisible by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { isVisible = true }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -152,7 +165,14 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // === Bannière de bienvenue avec gradient vert ===
+            // === Bannière de bienvenue avec gradient vert — avec animation ===
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = tween(500)
+                ) + fadeIn(animationSpec = tween(400))
+            ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -210,6 +230,7 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
             }
 
             Spacer(modifier = Modifier.height(20.dp))

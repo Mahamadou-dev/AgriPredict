@@ -3,18 +3,27 @@ package com.example.agripredict.di
 import android.content.Context
 import androidx.room.Room
 import com.example.agripredict.data.local.AgriPredictDatabase
+import com.example.agripredict.data.local.DatabaseSeeder
 import com.example.agripredict.data.preferences.LanguagePreferences
 import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.data.repository.DiagnosticRepositoryImpl
+import com.example.agripredict.data.repository.MaladieRepositoryImpl
 import com.example.agripredict.domain.repository.DiagnosticRepository
+import com.example.agripredict.domain.repository.MaladieRepository
 import com.example.agripredict.domain.usecase.GetDiagnosticsUseCase
 import com.example.agripredict.domain.usecase.SaveDiagnosticUseCase
 import com.example.agripredict.sync.NetworkChecker
 import com.example.agripredict.sync.SyncManager
+import com.example.agripredict.ui.screens.alerts.AlertsViewModel
 import com.example.agripredict.ui.screens.auth.AuthViewModel
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
+import com.example.agripredict.ui.screens.diseases.DiseasesViewModel
 import com.example.agripredict.ui.screens.history.HistoryViewModel
 import com.example.agripredict.util.TFLiteClassifier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Conteneur d'injection de dépendances simple.
@@ -54,6 +63,10 @@ class AppContainer(private val context: Context) {
         DiagnosticRepositoryImpl(database, diagnosticDao, imageDao, predictionDao)
     }
 
+    val maladieRepository: MaladieRepository by lazy {
+        MaladieRepositoryImpl(maladieDao, traitementDao)
+    }
+
     // === Use Cases ===
     val getDiagnosticsUseCase by lazy { GetDiagnosticsUseCase(diagnosticRepository) }
     val saveDiagnosticUseCase by lazy { SaveDiagnosticUseCase(diagnosticRepository) }
@@ -80,7 +93,8 @@ class AppContainer(private val context: Context) {
             classifier = tfliteClassifier,
             saveDiagnosticUseCase = saveDiagnosticUseCase,
             appContext = context,
-            sessionPreferences = sessionPreferences
+            sessionPreferences = sessionPreferences,
+            maladieRepository = maladieRepository
         )
     }
 
@@ -100,8 +114,37 @@ class AppContainer(private val context: Context) {
     val historyViewModelFactory by lazy {
         HistoryViewModel.Factory(
             repository = diagnosticRepository,
-            sessionPreferences = sessionPreferences
+            sessionPreferences = sessionPreferences,
+            maladieRepository = maladieRepository
         )
+    }
+
+    /**
+     * Factory pour créer le DiseasesViewModel avec ses dépendances.
+     */
+    val diseasesViewModelFactory by lazy {
+        DiseasesViewModel.Factory(
+            repository = maladieRepository
+        )
+    }
+
+    /**
+     * Factory pour créer le AlertsViewModel avec ses dépendances.
+     */
+    val alertsViewModelFactory by lazy {
+        AlertsViewModel.Factory(
+            alerteDao = alerteDao
+        )
+    }
+
+    // === Initialisation de la base de données ===
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    init {
+        // Pré-charger la base de connaissances au premier lancement
+        applicationScope.launch {
+            DatabaseSeeder.seedIfEmpty(maladieDao, traitementDao, alerteDao)
+        }
     }
 }
 

@@ -116,6 +116,87 @@
     <string name="sync_success">An ha&#x0257;a da nasara</string>
     <string name="sync_error">Kuskuren ha&#x0257;awa</string>
     <string name="sync_offline">Ba tare da intanet ba</string>
+
+    <!-- === Cututtuka === -->
+    <string name="diseases_search">Nemo cuta…</string>
+    <string name="diseases_empty">Ba a samu cuta ba</string>
+    <string name="diseases_empty_subtitle">Bayanan cututtuka ba su cika ba</string>
+    <string name="diseases_treatments">Magunguna</string>
+
+    <!-- === Sanarwa === -->
+    <string name="alerts_high">Mai girma</string>
+    <string name="alerts_medium">Matsakaici</string>
+    <string name="alerts_low">&#x01B4;an&#x0199;arami</string>
+    <string name="alerts_empty">Babu sanarwa</string>
+    <string name="alerts_empty_subtitle">Babu sanarwa a yankin ka</string>
+    <string name="alerts_expires">Ya &#x0199;are %1$s</string>
+    <string name="alerts_summary">Ta&#x0199;aitaccen sanarwa</string>
+
+    <!-- === Masani === -->
+    <string name="expert_title">Tuntu&#595;i masani</string>
+    <string name="expert_subtitle">Samu shawara daga masanin noma</string>
+    <string name="expert_quick_contact">Sauri tuntu&#595;a</string>
+    <string name="expert_call">Kira</string>
+    <string name="expert_email">Imel</string>
+    <string name="expert_form_title">Aika sa&#x0199;o</string>
+    <string name="expert_subject">Batu</string>
+    <string name="expert_message">Bayyana matsalar ka…</string>
+    <string name="expert_send">Aika</string>
+    <string name="expert_message_sent">An aika sa&#x0199;on!</string>
+    <string name="expert_tip">Shawara: &#x0257;auki hoton tsiron ka mai cuta daga shafin Bincike kafin ka tuntu&#595;i masani. Wannan zai taimaka wajen gano cutar.</string>
+
+    <!-- === Expert — Directory === -->
+    <string name="expert_directory_title">📞 Kundin masana</string>
+    <string name="expert_directory_subtitle">Kira ko aika SMS kai tsaye</string>
+    <string name="expert_call_action">📞 Kira</string>
+    <string name="expert_sms_action">💬 SMS</string>
+    <string name="expert_specialty">Kwararriya</string>
+    <string name="expert_zone">Yanki</string>
+    <string name="expert_or_send_message">Ko aika sa&#x0199;o ta imel</string>
+
+    <!-- === Alerts — Sort and filter === -->
+    <string name="alerts_sort_by">Tsara ta</string>
+    <string name="alerts_sort_date">Rana</string>
+    <string name="alerts_sort_gravity">Tsanani</string>
+    <string name="alerts_sort_zone">Yanki</string>
+    <string name="alerts_filter_all">Duka</string>
+
+    <!-- === Diseases — Categories === -->
+    <string name="diseases_all_plants">Duka</string>
+    <string name="diseases_category_title">Rukunoni</string>
+    <string name="diseases_total">Cututtuka %d</string>
+    <string name="diseases_description_title">📋 Bayani</string>
+    <string name="diseases_symptoms_title">🔍 Alamomi</string>
+
+    <!-- === Diagnostic — Treatments === -->
+    <string name="diagnostic_treatment_title">💊 Maganin da ake ba da shawara</string>
+    <string name="diagnostic_treatment_subtitle">Bisa ga bayanan mu</string>
+    <string name="diagnostic_disease_info">📋 Game da wannan cutar</string>
+    <string name="diagnostic_learn_more">Kara koyo</string>
+    <string name="diagnostic_no_treatment">Babu magani da ake da shi</string>
+    <string name="diagnostic_healthy_advice">🌿 Shawarwarin rigakafi</string>
+
+    <!-- === Game da mu === -->
+    <string name="about_description">Aikace-aikacen wayar don gano cututtukan tsirrai ta hanyar fasahar AI, an yi shi don manoman Yammacin Afirka.</string>
+    <string name="about_project_title">Aikin</string>
+    <string name="about_project_type">Iri</string>
+    <string name="about_project_type_value">Aikin &#x0199;arshen karatun digiri (PFE)</string>
+    <string name="about_university">Jami&#x02BC;a</string>
+    <string name="about_university_value">Jami&#x02BC;ar Abdou Moumouni ta Niamey</string>
+    <string name="about_year">Shekarar karatun</string>
+    <string name="about_author_title">Mai yi</string>
+    <string name="about_author">&#x0110;alibi</string>
+    <string name="about_author_value">GREMAH Mahamadou</string>
+    <string name="about_supervisor">Mai kula</string>
+    <string name="about_supervisor_value">Za a bayyana</string>
+    <string name="about_tech_title">Fasaha</string>
+    <string name="about_ai_title">Fasahar AI</string>
+    <string name="about_model">Tsarin</string>
+    <string name="about_classes">Iri cututtuka</string>
+    <string name="about_crops">Amfanin gona</string>
+    <string name="about_crops_value">Rogo, Masara, Barkono, Dankali, Tumatir</string>
+    <string name="about_accuracy">Daidaito</string>
+    <string name="about_footer">An yi shi da ❤ a Nijar — 2025</string>
     <plurals name="diseases_detected_count">
         <item quantity="one">An gano cuta %d</item>
         <item quantity="other">An gano cututtuka %d</item>

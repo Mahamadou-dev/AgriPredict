@@ -1,5 +1,10 @@
 package com.example.agripredict.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -12,11 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.agripredict.AgriPredictApplication
 import com.example.agripredict.ui.screens.about.AboutScreen
 import com.example.agripredict.ui.screens.alerts.AlertsScreen
+import com.example.agripredict.ui.screens.alerts.AlertsViewModel
 import com.example.agripredict.ui.screens.auth.AuthUiState
 import com.example.agripredict.ui.screens.auth.AuthViewModel
 import com.example.agripredict.ui.screens.auth.LoginScreen
@@ -25,8 +33,11 @@ import com.example.agripredict.ui.screens.auth.RegisterScreen
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticScreen
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
 import com.example.agripredict.ui.screens.diseases.DiseasesScreen
+import com.example.agripredict.ui.screens.diseases.DiseasesViewModel
 import com.example.agripredict.ui.screens.expert.ExpertScreen
+import com.example.agripredict.ui.screens.history.HistoryDetailScreen
 import com.example.agripredict.ui.screens.history.HistoryScreen
+import com.example.agripredict.ui.screens.history.HistoryViewModel
 import com.example.agripredict.ui.screens.home.HomeScreen
 import com.example.agripredict.ui.screens.settings.SettingsScreen
 
@@ -80,7 +91,31 @@ fun AgriPredictNavGraph(navController: NavHostController) {
 
             NavHost(
                 navController = navController,
-                startDestination = startDestination
+                startDestination = startDestination,
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(350)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 3 },
+                        animationSpec = tween(350)
+                    ) + fadeOut(animationSpec = tween(200))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 3 },
+                        animationSpec = tween(350)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(350)
+                    ) + fadeOut(animationSpec = tween(200))
+                }
             ) {
                 // ==========================================
                 // ÉCRANS D'AUTHENTIFICATION
@@ -165,17 +200,54 @@ fun AgriPredictNavGraph(navController: NavHostController) {
 
                 // Base de connaissances : maladies
                 composable(Screen.Diseases.route) {
-                    DiseasesScreen(onNavigateBack = { navController.popBackStack() })
+                    val diseasesViewModel: DiseasesViewModel = viewModel(
+                        factory = appContainer.diseasesViewModelFactory
+                    )
+                    DiseasesScreen(
+                        viewModel = diseasesViewModel,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
 
                 // Alertes agricoles
                 composable(Screen.Alerts.route) {
-                    AlertsScreen(onNavigateBack = { navController.popBackStack() })
+                    val alertsViewModel: AlertsViewModel = viewModel(
+                        factory = appContainer.alertsViewModelFactory
+                    )
+                    AlertsScreen(
+                        viewModel = alertsViewModel,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
 
                 // Historique des diagnostics
                 composable(Screen.History.route) {
-                    HistoryScreen(onNavigateBack = { navController.popBackStack() })
+                    val historyViewModel: HistoryViewModel = viewModel(
+                        factory = appContainer.historyViewModelFactory
+                    )
+                    HistoryScreen(
+                        viewModel = historyViewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToDetail = { diagnosticId ->
+                            navController.navigate(Screen.HistoryDetail.createRoute(diagnosticId))
+                        }
+                    )
+                }
+
+                // Détail d'un diagnostic
+                composable(
+                    route = Screen.HistoryDetail.route,
+                    arguments = listOf(navArgument("diagnosticId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val diagnosticId = backStackEntry.arguments?.getString("diagnosticId") ?: ""
+                    val historyViewModel: HistoryViewModel = viewModel(
+                        factory = appContainer.historyViewModelFactory
+                    )
+                    HistoryDetailScreen(
+                        viewModel = historyViewModel,
+                        diagnosticId = diagnosticId,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
 
                 // Contact expert

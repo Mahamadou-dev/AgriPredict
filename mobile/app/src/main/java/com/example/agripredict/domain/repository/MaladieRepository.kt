@@ -13,5 +13,7 @@ interface MaladieRepository {
 
     /** Récupère une maladie par son ID */
     suspend fun getMaladieById(id: Int): Maladie?
-}
 
+    /** Recherche une maladie par le label brut du modèle IA (ex: "Tomato___Early_blight") */
+    suspend fun findByLabel(rawLabel: String): Maladie?
+}

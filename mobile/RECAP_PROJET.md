@@ -2,21 +2,21 @@
 
 > **Application mobile agricole intelligente**
 > Projet de fin d'études (PFE) — Licence en Génie Logiciel
-> Dernière mise à jour : 10 mars 2026 — **Audit de stabilité effectué** ⚡
+> Dernière mise à jour : 10 mars 2026 — **Phase 7 bis implémentée — Amélioration UI/UX globale + transitions fluides** 🚀
 
 ---
 
 ## 📋 Table des matières
 
 1. [Vision du projet](#-vision-du-projet)
-2. [Stack technique](#-stack-technique)
-3. [Architecture du projet](#-architecture-du-projet)
+2. [Stack technique](#%EF%B8%8F-stack-technique)
+3. [Architecture du projet](#%EF%B8%8F-architecture-du-projet)
 4. [Ce qui a été fait](#-ce-qui-a-été-fait)
 5. [Bugs corrigés (audit du 10 mars 2026)](#-bugs-corrigés-audit-du-10-mars-2026)
 6. [Ce qui reste à faire](#-ce-qui-reste-à-faire)
-7. [Prochaine étape](#-prochaine-étape)
+7. [Prochaine étape](#-prochaine-étape-immédiate)
 8. [Comment tester ce qui a été fait](#-comment-tester-ce-qui-a-été-fait)
-9. [Problèmes connus](#-problèmes-connus)
+9. [Problèmes connus](#%EF%B8%8F-problèmes-connus)
 10. [Santé du projet](#-santé-du-projet)
 11. [Roadmap visuelle](#-roadmap-visuelle)
 
@@ -36,6 +36,7 @@
 
 **Principes fondamentaux :**
 - 📴 **Offline-first** : fonctionne sans Internet
+
 - 🌍 **Multilingue** : Français, Anglais, Hausa, Zarma
 - 🧹 **Simple et pédagogique** : code explicable devant un jury
 
@@ -44,7 +45,7 @@
 ## ⚙️ Stack technique
 
 | Composant | Technologie | Version |
-|-----------|------------|---------|
+| ----------- | ------------ | --------- |
 | Langage | Kotlin | 2.0.21 |
 | UI | Jetpack Compose + Material 3 | BOM 2024.12.01 |
 | Architecture | Clean Architecture + MVVM | Google recommended |
@@ -74,6 +75,7 @@ app/src/main/java/com/example/agripredict/
 │   ├── 📂 local/                   ← Base de données Room
 │   │   ├── AgriPredictDatabase.kt  ← Database Room (9 tables)
 │   │   ├── Converters.kt          ← TypeConverters (SyncStatus ↔ String)
+│   │   ├── DatabaseSeeder.kt      ← 🆕 Pré-chargement 24 maladies + 41 traitements + 6 alertes
 │   │   ├── 📂 entity/             ← 9 Entities (@Entity Room)
 │   │   │   ├── UserEntity.kt
 │   │   │   ├── DiagnosticEntity.kt
@@ -106,7 +108,8 @@ app/src/main/java/com/example/agripredict/
 │   │           └── DownlinkDTOs.kt
 │   │
 │   ├── 📂 repository/              ← Implémentations concrètes
-│   │   └── DiagnosticRepositoryImpl.kt  ← ⚡ Corrigé : transaction Room + ordre FK
+│   │   ├── DiagnosticRepositoryImpl.kt  ← ⚡ Corrigé : transaction Room + ordre FK
+│   │   └── MaladieRepositoryImpl.kt     ← 🆕 Enrichit Maladie + Traitement
 │   │
 │   └── 📂 preferences/             ← Préférences utilisateur
 │       ├── LanguagePreferences.kt   ← DataStore langue (agripredict_preferences)
@@ -141,15 +144,24 @@ app/src/main/java/com/example/agripredict/
 │   │   │   ├── LoginScreen.kt              ← Écran connexion (téléphone + mot de passe)
 │   │   │   ├── RegisterScreen.kt           ← Écran inscription agriculteur
 │   │   │   └── ProfileScreen.kt            ← Écran profil + édition + changer MDP + déconnexion
-│   │   ├── 📂 diseases/DiseasesScreen.kt    ← Base de connaissances (placeholder)
-│   │   ├── 📂 alerts/AlertsScreen.kt       ← Alertes agricoles (placeholder)
+│   │   ├── 📂 diseases/
+│   │   │   ├── DiseasesScreen.kt           ← 🆕 Base de connaissances (groupée par plante, expandable)
+│   │   │   └── DiseasesViewModel.kt        ← 🆕 ViewModel avec recherche + FilterChips par plante + observe MaladieRepository
+│   │   ├── 📂 alerts/
+│   │   │   ├── AlertsScreen.kt             ← 🆕 Alertes avec FilterChips gravité + menu tri (date/gravité/zone)
+│   │   │   └── AlertsViewModel.kt          ← 🆕 ViewModel avec tri + filtre gravité + observe AlerteDao
 │   │   ├── 📂 history/
-│   │   │   ├── HistoryScreen.kt            ← Historique diagnostics (placeholder UI)
-│   │   │   └── HistoryViewModel.kt         ← ViewModel ⚡ Corrigé : try-catch + Error state
-│   │   ├── 📂 expert/ExpertScreen.kt       ← Contact expert (placeholder)
-│   │   ├── 📂 about/AboutScreen.kt         ← À propos (placeholder)
+│   │   │   ├── HistoryScreen.kt            ← 🆕 Historique complet (search, cards, delete)
+│   │   │   ├── HistoryDetailScreen.kt      ← 🆕 Détail diagnostic = même vue que résultat diag (image, résultat, traitements BDD)
+│   │   │   └── HistoryViewModel.kt         ← ViewModel ⚡ + MaladieRepository pour traitements dans détail
+│   │   ├── 📂 expert/
+│   │   │   ├── ExpertScreen.kt             ← 🆕 Annuaire experts + Appel/SMS direct + formulaire email
+│   │   │   └── ExpertData.kt              ← 🆕 Données statiques des experts (nom, spécialité, téléphone, zone)
+│   │   ├── 📂 about/AboutScreen.kt         ← 🆕 À propos (projet, auteur, stack, IA)
 │   │   └── 📂 settings/SettingsScreen.kt   ← Paramètres (langue)
-│   └── 📂 components/              ← (vide — prêt pour composants réutilisables)
+│   └── 📂 components/              ← 🆕 Composants réutilisables
+│       ├── AnimationUtils.kt       ← 🆕 Transitions de navigation (slide, fade, expand)
+│       └── SharedComponents.kt     ← 🆕 ConfidenceBar, StatusBadge, TraitementCard, EmptyStateComponent
 │
 ├── 📂 sync/                         ← SYNCHRONISATION OFFLINE-FIRST
 │   ├── SyncStatus.kt               ← enum PENDING / SYNCED / FAILED
@@ -159,7 +171,7 @@ app/src/main/java/com/example/agripredict/
 │   └── NetworkChecker.kt           ← Détection connectivité
 │
 ├── 📂 di/                           ← INJECTION DE DÉPENDANCES
-│   └── AppContainer.kt             ← ⚡ Corrigé : +database dans repo, +historyViewModelFactory
+│   └── AppContainer.kt             ← ⚡ +maladieRepo, +diseasesVM, +alertsVM, +DatabaseSeeder init
 │
 └── 📂 util/                         ← UTILITAIRES
     ├── LocaleManager.kt            ← Changement de langue dynamique
@@ -167,10 +179,10 @@ app/src/main/java/com/example/agripredict/
     └── LabelFormatter.kt           ← Formatage des labels IA bruts
 
 res/                                  ← RESSOURCES i18n
-├── values/strings.xml               ← 🇫🇷 Français (107 lignes — auth + profil inclus)
-├── values-en/strings.xml            ← 🇬🇧 English (88 lignes)
-├── values-ha/strings.xml            ← 🇳🇬 Hausa (87 lignes)
-├── values-dje/strings.xml           ← 🇳🇪 Zarma (87 lignes)
+├── values/strings.xml               ← 🇫🇷 Français (~185 clés)
+├── values-en/strings.xml            ← 🇬🇧 English (~185 clés)
+├── values-ha/strings.xml            ← 🇳🇬 Hausa (~185 clés)
+├── values-dje/strings.xml           ← 🇳🇪 Zarma (~185 clés)
 └── xml/locales_config.xml           ← Config Per-App Language (Android 13+)
 ```
 
@@ -317,6 +329,48 @@ res/                                  ← RESSOURCES i18n
 | historyViewModelFactory | ✅ | Ajouté dans AppContainer (manquait) |
 | Build validé | ✅ | `BUILD SUCCESSFUL` confirmé après toutes les corrections |
 
+### Phase 7 — Écrans fonctionnels ✅ 🆕
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| **HistoryScreen.kt** | ✅ | LazyColumn, search, cards avec miniature Coil, confiance colorée, delete dialog |
+| **HistoryDetailScreen.kt** | ✅ 🆕 | Image plein écran, résultat (sain/malade), infos détaillées, confiance visuelle |
+| **MaladieRepositoryImpl.kt** | ✅ 🆕 | Combine MaladieDao + TraitementDao pour enrichir les objets Maladie |
+| **DatabaseSeeder.kt** | ✅ 🆕 | Pré-charge 24 maladies, 41 traitements, 6 alertes réalistes (Niger) |
+| **DiseasesViewModel.kt** | ✅ 🆕 | Recherche + observe MaladieRepository via Flow |
+| **DiseasesScreen.kt** | ✅ | Groupée par plante, cards expandables, traitements avec dosages |
+| **AlertsViewModel.kt** | ✅ 🆕 | Observe AlerteDao via Flow |
+| **AlertsScreen.kt** | ✅ | Résumé par gravité (3 chips), cards avec couleurs de sévérité, zones |
+| **ExpertScreen.kt** | ✅ | Appel tél (Intent.ACTION_DIAL), email, formulaire + envoi email |
+| **AboutScreen.kt** | ✅ | Projet, auteur, université, stack technique (FlowRow chips), modèle IA |
+| **AppContainer.kt** | ✅ | +maladieRepository, +diseasesViewModelFactory, +alertsViewModelFactory, +seeder init |
+| **AgriPredictNavGraph.kt** | ✅ | +HistoryDetail route, +ViewModels injectés (History, Diseases, Alerts) |
+| **strings.xml (4 langues)** | ✅ | +35 nouvelles clés (maladies, alertes, expert, about) par langue |
+| Build validé | ✅ | `BUILD SUCCESSFUL` — 0 erreurs, 0 warnings |
+
+### Phase 7 bis — Amélioration UI/UX globale ✅ 🆕🎨
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| **Transitions de navigation** | ✅ 🆕 | Slide-in/out horizontal fluide + fade entre tous les écrans (NavHost global) |
+| **AnimationUtils.kt** | ✅ 🆕 | Bibliothèque d'animations réutilisables (slide, fade, expand) |
+| **SharedComponents.kt** | ✅ 🆕 | Composants partagés : `ConfidenceBar`, `StatusBadge`, `TraitementCard`, `EmptyStateComponent` |
+| **HomeScreen — Animations** | ✅ 🆕 | Bannière avec animation d'apparition (slideIn + fadeIn) |
+| **DiagnosticScreen — Résultat enrichi** | ✅ 🆕 | Après analyse IA → affiche description maladie BDD + traitements recommandés + barre confiance animée |
+| **DiagnosticViewModel — MaladieRepository** | ✅ 🆕 | `matchedMaladie` Flow : recherche la maladie correspondante dans la BDD après classification IA |
+| **MaladieRepositoryImpl — findByLabel()** | ✅ 🆕 | Table de mapping 24 labels IA → 24 IDs maladies BDD (cassava___cbb → id=1, Tomato___Late_blight → id=18…) |
+| **HistoryDetailScreen — Traitements** | ✅ 🆕 | Même design que résultat diagnostic : image + badge plante + statut sain/malade + confiance + description + traitements |
+| **HistoryViewModel — MaladieRepository** | ✅ 🆕 | `selectedMaladie` Flow : charge les traitements correspondants au diagnostic sélectionné |
+| **ExpertScreen — Annuaire** | ✅ 🆕 | 5 experts avec gros boutons 📞 Appeler et 💬 SMS (Intent.ACTION_DIAL + SENDTO), formulaire email en section dépliable |
+| **ExpertData.kt** | ✅ 🆕 | Données statiques : 5 experts (Dr. Ibrahim Moussa, Mme Aïssa Abdou…) avec spécialité, téléphone, zone |
+| **DiseasesScreen — FilterChips** | ✅ 🆕 | Chips par catégorie de plante (Manioc 🌿, Maïs 🌾, Tomate 🍅, Poivron 🌶️, Pomme de terre 🥔) + recherche + groupement |
+| **DiseasesScreen — Expandable cards** | ✅ 🆕 | Cartes dépliables avec `animateContentSize` : description + traitements avec dosages (composant `TraitementCard` partagé) |
+| **DiseasesViewModel — FilterChips** | ✅ 🆕 | `selectedPlant` + `availablePlants` Flows pour filtre par catégorie de plante |
+| **AlertsScreen — Tri et filtre** | ✅ 🆕 | FilterChips par gravité (Toutes/Élevée/Moyenne/Faible) + menu DropdownMenu tri (Date/Gravité/Zone) |
+| **AlertsViewModel — Tri + filtre** | ✅ 🆕 | `sortOption` (DATE/GRAVITY/ZONE) + `gravityFilter` (ALL/HIGH/MEDIUM/LOW) combinés avec `combine()` |
+| **AlertsScreen — Cartes** | ✅ 🆕 | Badge % gravité coloré, icône zone, date, expiration |
+| **AppContainer — MaladieRepository** | ✅ 🆕 | Injecté dans DiagnosticViewModel.Factory et HistoryViewModel.Factory |
+| **i18n enrichi** | ✅ 🆕 | +29 nouvelles clés dans 4 langues (traitements diag, annuaire expert, tri alertes, catégories maladies) |
+| Build validé | ✅ | `BUILD SUCCESSFUL` — 0 erreurs |
+
 ---
 
 ## 🔧 Bugs corrigés (audit du 10 mars 2026)
@@ -351,13 +405,6 @@ res/                                  ← RESSOURCES i18n
 
 ## 🔲 Ce qui reste à faire
 
-### Phase 7 — Écrans fonctionnels 🔲
-- [ ] **Historique des diagnostics — UI** (HistoryScreen avec LazyColumn, HistoryDetailScreen)
-- [ ] **Base de connaissances maladies** (lire MaladieDao + TraitementDao, afficher fiches)
-- [ ] **Alertes agricoles** (lire AlerteDao, afficher par zone + gravité)
-- [ ] **Contact expert** (formulaire simple ou numéro de téléphone)
-- [ ] **À propos** (informations sur l'app, version, auteur)
-
 ### Phase 8 — Synchronisation complète 🔲
 - [ ] Implémenter `SyncManager` (remplacer les TODO)
 - [ ] Implémenter `SyncWorker` avec WorkManager
@@ -372,44 +419,40 @@ res/                                  ← RESSOURCES i18n
 - [ ] Tests de connexion mobile ↔ serveur
 
 ### Phase 10 — Finitions 🔲
-- [ ] Gestion des permissions runtime (caméra, GPS)
-- [ ] Écrans de chargement (loading states)
 - [ ] Tests unitaires
 - [ ] Tests d'instrumentation
 - [ ] Optimisation performance
 - [ ] Logo et assets finaux
 - [ ] Remplacer `fallbackToDestructiveMigration` par des migrations Room propres
+- [ ] Géolocalisation GPS dans les diagnostics
 
 ---
 
 ## 🎯 Prochaine étape immédiate
 
-### → Phase 7 : Rendre les écrans fonctionnels
+### → Phase 8 : Synchronisation complète
 
-Le `HistoryViewModel` est déjà prêt — il charge, filtre et supprime les diagnostics.
+Tous les écrans sont maintenant fonctionnels. La base de connaissances est pré-chargée localement (24 maladies, 41 traitements, 6 alertes). La prochaine étape est d'implémenter la synchronisation avec le backend.
 
 ```
 Ordre recommandé :
 
-1. Historique des diagnostics — UI (★★★★★)
-   └── ui/screens/history/HistoryScreen.kt
-       → Le ViewModel existe déjà (charge, filtre, supprime)
-       → Remplir : LazyColumn + date, label, confiance %, image miniature
-       → HistoryDetailScreen pour le détail d'un diagnostic
+1. Backend API (★★★★★)
+   └── Configurer l'URL Retrofit, endpoints REST
+   └── Authentification par token
 
-2. Base de connaissances maladies (★★★★)
-   └── ui/screens/diseases/DiseasesScreen.kt
-       → Lire MaladieDao.observeAll() + TraitementDao
-       → Prépopuler la base avec des données locales
+2. SyncManager (★★★★)
+   └── Implémenter les TODO dans SyncManager.kt
+   └── Upload diagnostics PENDING → serveur
+   └── Download maladies/traitements/alertes à jour
 
-3. Alertes agricoles (★★★)
-   └── ui/screens/alerts/AlertsScreen.kt
+3. SyncWorker (★★★)
+   └── WorkManager périodique en arrière-plan
+   └── Retry automatique pour FAILED
 
-4. Contact expert (★★)
-   └── ui/screens/expert/ExpertScreen.kt
-
-5. À propos (★)
-   └── ui/screens/about/AboutScreen.kt
+4. Tests (★★★)
+   └── Tests unitaires ViewModels
+   └── Tests Room (DAO)
 ```
 
 ---
@@ -476,32 +519,44 @@ Mode sombre Android → Thème s'adapte
 
 ### Bilan de l'audit du 10 mars 2026
 
-| Critère | Avant audit | Après audit |
+| Critère | Avant audit | Après Phase 7 bis |
 |---------|-------------|-------------|
 | Build | ✅ PASS | ✅ PASS |
 | Erreurs compilation | 0 | 0 |
 | Sauvegarde diagnostic | ❌ CRASH FK | ✅ CORRIGÉ |
 | Démarrage app | ⚠️ Fragile | ✅ ROBUSTE |
 | Auth (toutes fonctions) | ⚠️ Sans protection | ✅ ROBUSTE |
-| Historique | ⚠️ Sans protection | ✅ ROBUSTE |
-| historyViewModelFactory | ❌ MANQUANT | ✅ AJOUTÉ |
+| Historique | ⚠️ Sans protection | ✅ FONCTIONNEL (UI + détail + traitements BDD) |
+| Base de connaissances | 🔲 Placeholder | ✅ FONCTIONNEL (24 maladies, FilterChips, expandable) |
+| Alertes | 🔲 Placeholder | ✅ FONCTIONNEL (6 alertes, tri, filtre gravité) |
+| Contact expert | 🔲 Placeholder | ✅ FONCTIONNEL (annuaire 5 experts, appel/SMS/email) |
+| À propos | 🔲 Placeholder | ✅ FONCTIONNEL (projet + auteur + stack) |
+| Diagnostic → Traitements | 🔲 Non connecté | ✅ CONNECTÉ (label IA → maladie BDD → traitements) |
+| Composants réutilisables | 🔲 Aucun | ✅ 4 composants (ConfidenceBar, StatusBadge, TraitementCard, EmptyState) |
+| Transitions navigation | 🔲 Aucune | ✅ Slide + fade entre tous les écrans |
 | Architecture Clean Arch | ✅ Solide | ✅ Solide |
-| MVVM | ✅ Solide | ✅ Solide |
+| MVVM | ✅ Solide | ✅ Solide (5 ViewModels) |
 | Offline-first | ✅ Bon | ✅ Bon |
-| i18n | ✅ Complet | ✅ Complet |
+| i18n | ✅ Complet | ✅ Complet (~185 clés/langue) |
 
-### Score de santé global : 🟢 8.5/10
+### Score de santé global : 🟢 9.5/10
 
 **Points forts :**
 - Architecture propre (Clean Architecture + MVVM)
-- 63 fichiers Kotlin bien organisés (~5 500 lignes)
+- ~70 fichiers Kotlin bien organisés
+- **Tous les écrans fonctionnels** avec UI/UX soignée
+- **Mapping IA → BDD** : le diagnostic affiche les traitements recommandés de la base de connaissances
+- **Composants réutilisables** : ConfidenceBar, StatusBadge, TraitementCard partagés entre Diagnostic, Historique, Maladies
+- **Transitions fluides** entre tous les écrans (slide + fade)
+- **Annuaire experts** avec appel/SMS direct (fonctionne sans internet)
+- **FilterChips** interactifs sur Maladies et Alertes
+- Base de connaissances pré-chargée (24 maladies, 41 traitements, 6 alertes)
 - Gestion d'erreurs robuste (après corrections)
-- i18n 4 langues, 0 texte en dur
+- i18n 4 langues, ~185 clés par langue, 0 texte en dur
 - Transaction Room atomique pour sauvegarde multi-table
-- Modèle IA fonctionnel
+- Modèle IA fonctionnel avec mapping complet vers BDD
 
 **Points à améliorer (non-bloquants) :**
-- 5 écrans placeholder à remplir (Phase 7)
 - Sync non implémentée (Phase 8)
 - Pas de tests unitaires (Phase 10)
 - `fallbackToDestructiveMigration` à remplacer en production
@@ -525,16 +580,22 @@ Mode sombre Android → Thème s'adapte
 10. Authentification complète       ✅ FAIT      —
 11. Modèle IA déployé + bug fix     ✅ FAIT      —
 12. HistoryViewModel                ✅ FAIT      —
-13. ⚡ Audit & correction bugs      ✅ FAIT      — ← NOUVEAU
+13. ⚡ Audit & correction bugs      ✅ FAIT      —
+14. 🚀 Historique UI + Détail       ✅ FAIT      —
+15. 🚀 Base de connaissances        ✅ FAIT      —
+16. 🚀 Alertes agricoles            ✅ FAIT      —
+17. 🚀 Contact expert               ✅ FAIT      —
+18. 🚀 À propos                     ✅ FAIT      —
+19. 🚀 DatabaseSeeder + wiring      ✅ FAIT      —
+20. 🎨 UI/UX Global + animations    ✅ FAIT      — ← NOUVEAU
+21. 🎨 Mapping IA→BDD traitements   ✅ FAIT      — ← NOUVEAU
+22. 🎨 Annuaire experts + SMS       ✅ FAIT      — ← NOUVEAU
+23. 🎨 FilterChips maladies+alertes ✅ FAIT      — ← NOUVEAU
+24. 🎨 Composants réutilisables     ✅ FAIT      — ← NOUVEAU
 ────────────────────────────────────────────────────────
-14. 🎯 Historique UI + Détail       🔲 NEXT     ★★★★★
-15. Base de connaissances maladies  🔲           ★★★★
-16. Alertes agricoles               🔲           ★★★
-17. Contact expert                  🔲           ★★
-18. À propos                        🔲           ★
-19. Sync complète + Backend         🔲           ★★★★
-20. Tests                           🔲           ★★★
-21. Finitions + polish              🔲           ★★
+25. 🎯 Sync complète + Backend      🔲 NEXT     ★★★★
+26. Tests                           🔲           ★★★
+27. Finitions + polish              🔲           ★★
 ────────────────────────────────────────────────────────
 ```
 
@@ -544,15 +605,21 @@ Mode sombre Android → Thème s'adapte
 
 | Fichier | Rôle |
 |---------|------|
-| `AppContainer.kt` | DI : Database, DAOs, Repos, IA, Auth, History, ViewModels |
+| `AppContainer.kt` | DI : Database, DAOs, Repos (Diagnostic+Maladie), IA, Auth, 5 ViewModels, Seeder |
 | `AgriPredictDatabase.kt` | 9 tables Room |
+| `DatabaseSeeder.kt` | 24 maladies + 41 traitements + 6 alertes pré-chargés |
 | `DiagnosticRepositoryImpl.kt` | Transaction Room, 3 DAOs, ordre FK correct |
-| `DiagnosticViewModel.kt` | 6 états, analyse IA, sauvegarde avec vérification userId |
+| `MaladieRepositoryImpl.kt` | Combine MaladieDao + TraitementDao + mapping label IA → maladie BDD |
+| `DiagnosticViewModel.kt` | 6 états, analyse IA, matchedMaladie (traitements BDD), sauvegarde |
 | `AuthViewModel.kt` | Auth complète (try-catch robuste dans toutes les fonctions) |
-| `HistoryViewModel.kt` | Historique (try-catch, état Error) |
+| `HistoryViewModel.kt` | Historique (try-catch, selectedMaladie pour traitements dans détail) |
+| `DiseasesViewModel.kt` | FilterChips par plante + recherche + observe MaladieRepository |
+| `AlertsViewModel.kt` | Tri (date/gravité/zone) + filtre gravité + observe AlerteDao |
 | `TFLiteClassifier.kt` | Moteur IA TFLite + mode démo |
+| `SharedComponents.kt` | ConfidenceBar, StatusBadge, TraitementCard, EmptyStateComponent |
+| `ExpertData.kt` | Annuaire : 5 experts (nom, spécialité, téléphone, zone) |
 | `SessionPreferences.kt` | DataStore session (userId, isLoggedIn) |
-| `AgriPredictNavGraph.kt` | 12 routes + auth conditionnelle |
+| `AgriPredictNavGraph.kt` | 12 routes + auth conditionnelle + transitions slide/fade |
 
 ---
 
@@ -560,17 +627,23 @@ Mode sombre Android → Thème s'adapte
 
 | Métrique | Valeur |
 |----------|--------|
-| Fichiers Kotlin | 63 fichiers |
-| Lignes de code Kotlin | ~5 500 lignes |
+| Fichiers Kotlin | ~72 fichiers |
 | Tables Room | 9 |
 | DAOs | 9 |
-| Écrans UI | 11 (dont 5 placeholders) |
-| ViewModels | 3 |
+| Écrans UI | 12 (tous fonctionnels, 0 placeholder) |
+| ViewModels | 5 (Diagnostic, Auth, History, Diseases, Alerts) |
+| Composants réutilisables | 4 (ConfidenceBar, StatusBadge, TraitementCard, EmptyState) |
 | Langues | 4 (FR, EN, HA, DJE) |
+| Clés i18n par langue | ~185 (identique dans les 4 langues) |
 | Routes navigation | 12 |
+| Maladies pré-chargées | 24 (matching 24 classes IA) |
+| Traitements pré-chargés | 41 |
+| Alertes pré-chargées | 6 |
+| Experts dans l'annuaire | 5 |
+| Mapping labels IA → BDD | 24 (100% des classes couvertes) |
 | Bugs critiques corrigés | 2 (FK order + userId fallback) |
 | Bugs moyens corrigés | 3 (try-catch + factory manquant) |
-| Build status | ✅ BUILD SUCCESSFUL (10 mars 2026) |
+| Build status | ✅ BUILD SUCCESSFUL |
 | Erreurs compile | 0 |
 
 ---
@@ -578,17 +651,26 @@ Mode sombre Android → Thème s'adapte
 ## 👨‍🎓 Notes pour la soutenance
 
 - **Architecture** : Clean Architecture — séparation data/domain/ui
-- **MVVM** : StateFlow/collectAsState
+- **MVVM** : StateFlow/collectAsState, 5 ViewModels
 - **Offline-first** : Room + DataStore, sync PENDING/SYNCED/FAILED
+- **Base de connaissances** : 24 maladies + 41 traitements pré-chargés (DatabaseSeeder)
+- **Mapping IA → BDD** : Chaque label du modèle IA correspond à une maladie dans la BDD locale avec ses traitements
+- **Composants réutilisables** : ConfidenceBar, StatusBadge, TraitementCard partagés entre 3 écrans
+- **Transitions fluides** : Slide + fade entre tous les écrans (NavHost global)
+- **Annuaire experts** : Appel téléphonique et SMS direct (fonctionne hors ligne)
+- **FilterChips** : Filtrage interactif par plante (Maladies) et par gravité (Alertes)
 - **Transaction Room** : Sauvegarde multi-table atomique (Diagnostic→Image→Prediction)
 - **Foreign Keys** : Insertions parent→enfant respectées
 - **Gestion d'erreurs** : try-catch dans tous les ViewModels
-- **i18n** : 4 langues sans modifier le code source
+- **i18n** : 4 langues (~185 clés chacune, toutes synchronisées) sans modifier le code source
 - **DI manuelle** : Choix pédagogique (plus simple que Hilt)
-- **Modèle IA** : MobileNetV2 INT8 quantifié, 24 classes
+- **Modèle IA** : MobileNetV2 INT8 quantifié, 24 classes, ~95% précision
 - **Preprocessing** : Pixels bruts [0,255] — Rescaling intégrée au modèle
+- **12 écrans** : Tous fonctionnels (0 placeholder)
+- **UX agriculteur** : Gros boutons, icônes explicites, design adapté aux non-digitaux
 
 ---
 
-> 📌 **Prochain objectif :** Implémenter l'UI de l'Historique des diagnostics
-> Le ViewModel est prêt — il faut remplir `HistoryScreen.kt` (LazyColumn) et créer `HistoryDetailScreen.kt`
+> 📌 **Prochain objectif :** Implémenter la synchronisation avec le backend
+> Les SyncManager et SyncWorker sont en place (squelette) — il faut connecter l'API REST
+> L'UI/UX est maintenant complète et cohérente avec transitions fluides et données interconnectées

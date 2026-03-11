@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.domain.model.DiagnosticResult
+import com.example.agripredict.domain.model.Maladie
+import com.example.agripredict.domain.repository.MaladieRepository
 import com.example.agripredict.domain.usecase.SaveDiagnosticUseCase
 import com.example.agripredict.util.LabelFormatter
 import com.example.agripredict.util.TFLiteClassifier
@@ -29,16 +31,16 @@ import java.util.UUID
  * Gère le flux complet :
  * 1. Capture photo (caméra OU galerie)
  * 2. Analyse IA via TFLite
- * 3. Affichage résultat formaté
- * 4. Sauvegarde dans Room
- *
- * Suit le pattern MVVM : l'UI observe le StateFlow et réagit aux changements.
+ * 3. Recherche de la maladie correspondante dans la BDD
+ * 4. Affichage résultat formaté + traitements recommandés
+ * 5. Sauvegarde dans Room
  */
 class DiagnosticViewModel(
     private val classifier: TFLiteClassifier,
     private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
     private val appContext: Context,
-    private val sessionPreferences: SessionPreferences
+    private val sessionPreferences: SessionPreferences,
+    private val maladieRepository: MaladieRepository
 ) : ViewModel() {
 
     companion object {
@@ -48,6 +50,10 @@ class DiagnosticViewModel(
     // === État observable par l'UI ===
     private val _uiState = MutableStateFlow<DiagnosticUiState>(DiagnosticUiState.Idle)
     val uiState: StateFlow<DiagnosticUiState> = _uiState.asStateFlow()
+
+    /** Maladie trouvée dans la BDD correspondant au résultat IA */
+    private val _matchedMaladie = MutableStateFlow<Maladie?>(null)
+    val matchedMaladie: StateFlow<Maladie?> = _matchedMaladie.asStateFlow()
 
     // Données temporaires du diagnostic en cours
     private var currentBitmap: Bitmap? = null
@@ -108,13 +114,14 @@ class DiagnosticViewModel(
 
     /**
      * Lance l'analyse IA sur l'image capturée.
-     * Exécute le classifieur TFLite dans un thread de calcul.
+     * Après le résultat IA, recherche la maladie correspondante dans la BDD.
      */
     fun analyzeImage() {
         val bitmap = currentBitmap ?: return
 
         viewModelScope.launch(Dispatchers.Default) {
             _uiState.value = DiagnosticUiState.Analyzing
+            _matchedMaladie.value = null
 
             try {
                 // Exécuter la classification IA
@@ -135,6 +142,20 @@ class DiagnosticViewModel(
                     confidence = result.confidence,
                     isDemo = result.isDemo
                 )
+
+                // Rechercher la maladie correspondante dans la BDD pour les traitements
+                try {
+                    val maladie = maladieRepository.findByLabel(result.label)
+                    _matchedMaladie.value = maladie
+                    if (maladie != null) {
+                        Log.d(TAG, "📚 Maladie BDD trouvée : ${maladie.nomCommun} (${maladie.traitements.size} traitements)")
+                    } else {
+                        Log.w(TAG, "⚠️ Aucune maladie BDD pour le label : ${result.label}")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Erreur recherche maladie BDD : ${e.message}")
+                }
+
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur analyse IA : ${e.message}")
                 _uiState.value = DiagnosticUiState.Error(e.message ?: "Erreur d'analyse")
@@ -189,6 +210,7 @@ class DiagnosticViewModel(
         currentBitmap = null
         currentImagePath = ""
         currentResult = null
+        _matchedMaladie.value = null
         _uiState.value = DiagnosticUiState.Idle
     }
 
@@ -221,12 +243,13 @@ class DiagnosticViewModel(
         private val classifier: TFLiteClassifier,
         private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
         private val appContext: Context,
-        private val sessionPreferences: SessionPreferences
+        private val sessionPreferences: SessionPreferences,
+        private val maladieRepository: MaladieRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DiagnosticViewModel::class.java)) {
-                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext, sessionPreferences) as T
+                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext, sessionPreferences, maladieRepository) as T
             }
             throw IllegalArgumentException("ViewModel inconnu : ${modelClass.name}")
         }

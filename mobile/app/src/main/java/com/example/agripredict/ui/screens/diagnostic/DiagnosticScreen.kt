@@ -35,6 +35,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agripredict.R
+import com.example.agripredict.domain.model.Maladie
+import com.example.agripredict.ui.components.ConfidenceBar
+import com.example.agripredict.ui.components.StatusBadge
+import com.example.agripredict.ui.components.TraitementCard
 
 /**
  * Écran de diagnostic IA complet et professionnel.
@@ -52,6 +56,7 @@ fun DiagnosticScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val matchedMaladie by viewModel.matchedMaladie.collectAsState()
 
     // === Permission caméra ===
     var hasCameraPermission by remember { mutableStateOf(false) }
@@ -144,6 +149,7 @@ fun DiagnosticScreen(
                             isHealthy = state.isHealthy,
                             confidence = state.confidence,
                             isDemo = state.isDemo,
+                            matchedMaladie = matchedMaladie,
                             onSave = { viewModel.saveDiagnostic() },
                             onNewDiagnostic = { viewModel.reset() }
                         )
@@ -440,7 +446,7 @@ private fun AnalyzingContent() {
 }
 
 /**
- * Résultat de l'analyse — Beau design avec carte de résultat.
+ * Résultat de l'analyse — Design riche avec traitements recommandés depuis la BDD.
  */
 @Composable
 private fun ResultContent(
@@ -450,6 +456,7 @@ private fun ResultContent(
     isHealthy: Boolean,
     confidence: Float,
     isDemo: Boolean,
+    matchedMaladie: Maladie?,
     onSave: () -> Unit,
     onNewDiagnostic: () -> Unit
 ) {
@@ -482,7 +489,7 @@ private fun ResultContent(
         Spacer(Modifier.height(12.dp))
     }
 
-    // Image analysée avec overlay en dégradé
+    // Image analysée avec badge plante
     Box(modifier = Modifier.fillMaxWidth()) {
         Card(
             shape = RoundedCornerShape(20.dp),
@@ -534,9 +541,6 @@ private fun ResultContent(
     val statusColor = if (isHealthy) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.error
 
-    val statusIcon = if (isHealthy) Icons.Filled.CheckCircle
-    else Icons.Filled.Warning
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -554,26 +558,14 @@ private fun ResultContent(
             modifier = Modifier.padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Icône statut
-            Icon(
-                statusIcon, null,
-                modifier = Modifier.size(40.dp),
-                tint = statusColor
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            // Statut : Saine ou Malade
-            Text(
-                text = if (isHealthy) stringResource(R.string.diagnostic_result_healthy)
-                else stringResource(R.string.diagnostic_result_disease),
-                style = MaterialTheme.typography.labelLarge,
-                color = statusColor,
-                fontWeight = FontWeight.Bold
+            StatusBadge(
+                isHealthy = isHealthy,
+                healthyText = stringResource(R.string.diagnostic_result_healthy),
+                diseaseText = stringResource(R.string.diagnostic_result_disease)
             )
 
             if (!isHealthy && diseaseName.isNotBlank()) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(10.dp))
                 Text(
                     text = diseaseName,
                     style = MaterialTheme.typography.headlineSmall,
@@ -587,42 +579,96 @@ private fun ResultContent(
             HorizontalDivider(color = statusColor.copy(alpha = 0.2f))
             Spacer(Modifier.height(16.dp))
 
-            // Barre de confiance
-            Text(
-                text = stringResource(R.string.diagnostic_result_confidence),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ConfidenceBar(
+                confidence = confidence,
+                label = stringResource(R.string.diagnostic_result_confidence)
             )
-            Spacer(Modifier.height(10.dp))
+        }
+    }
 
-            // Pourcentage en grand
-            Text(
-                text = "${"%.0f".format(confidence * 100)}%",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = when {
-                    confidence > 0.8f -> MaterialTheme.colorScheme.primary
-                    confidence > 0.5f -> MaterialTheme.colorScheme.tertiary
-                    else -> MaterialTheme.colorScheme.error
+    // === Section Traitements Recommandés (depuis BDD) ===
+    AnimatedVisibility(
+        visible = matchedMaladie != null,
+        enter = expandVertically(animationSpec = tween(500)) + fadeIn(tween(400, delayMillis = 100)),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        matchedMaladie?.let { maladie ->
+            Column(modifier = Modifier.padding(top = 20.dp)) {
+                // Description de la maladie
+                if (maladie.description.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = stringResource(R.string.diagnostic_disease_info),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = maladie.description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
-            )
 
-            Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(16.dp))
 
-            // Barre de progression
-            LinearProgressIndicator(
-                progress = { confidence },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(5.dp)),
-                color = when {
-                    confidence > 0.8f -> MaterialTheme.colorScheme.primary
-                    confidence > 0.5f -> MaterialTheme.colorScheme.tertiary
-                    else -> MaterialTheme.colorScheme.error
-                },
-                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
-            )
+                // Titre section traitements
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        Icons.Filled.MedicalServices,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = if (isHealthy) stringResource(R.string.diagnostic_healthy_advice)
+                            else stringResource(R.string.diagnostic_treatment_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.diagnostic_treatment_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                if (maladie.traitements.isNotEmpty()) {
+                    maladie.traitements.forEach { traitement ->
+                        TraitementCard(
+                            titre = traitement.titre,
+                            description = traitement.description,
+                            dosage = traitement.dosage,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = stringResource(R.string.diagnostic_no_treatment),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 

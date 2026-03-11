@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.domain.model.DiagnosticResult
+import com.example.agripredict.domain.model.Maladie
 import com.example.agripredict.domain.repository.DiagnosticRepository
+import com.example.agripredict.domain.repository.MaladieRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -17,11 +19,12 @@ import kotlinx.coroutines.launch
  * - Charger les diagnostics de l'utilisateur connecté depuis Room
  * - Filtrer les diagnostics par recherche
  * - Supprimer un diagnostic
- * - Fournir le détail d'un diagnostic
+ * - Fournir le détail d'un diagnostic + maladie correspondante
  */
 class HistoryViewModel(
     private val repository: DiagnosticRepository,
-    private val sessionPreferences: SessionPreferences
+    private val sessionPreferences: SessionPreferences,
+    private val maladieRepository: MaladieRepository
 ) : ViewModel() {
 
     companion object {
@@ -40,6 +43,10 @@ class HistoryViewModel(
     private val _selectedDiagnostic = MutableStateFlow<DiagnosticResult?>(null)
     val selectedDiagnostic: StateFlow<DiagnosticResult?> = _selectedDiagnostic.asStateFlow()
 
+    /** Maladie correspondante au diagnostic sélectionné */
+    private val _selectedMaladie = MutableStateFlow<Maladie?>(null)
+    val selectedMaladie: StateFlow<Maladie?> = _selectedMaladie.asStateFlow()
+
     init {
         loadDiagnostics()
     }
@@ -47,7 +54,6 @@ class HistoryViewModel(
     /**
      * Charge les diagnostics de l'utilisateur connecté.
      * Combine le Flow de Room avec le filtre de recherche.
-     * Protégé par try-catch pour éviter un crash si la DB a un problème.
      */
     private fun loadDiagnostics() {
         viewModelScope.launch {
@@ -58,7 +64,6 @@ class HistoryViewModel(
                     return@launch
                 }
 
-                // Combiner les diagnostics avec la recherche
                 combine(
                     repository.observeDiagnosticsByUser(userId),
                     _searchQuery
@@ -94,12 +99,23 @@ class HistoryViewModel(
         _selectedDiagnostic.value = diagnostic
     }
 
-    /** Charge un diagnostic par son ID (pour la navigation par route) */
+    /** Charge un diagnostic par son ID + la maladie correspondante */
     fun loadDiagnosticById(diagnosticId: String) {
         viewModelScope.launch {
             try {
                 val diagnostic = repository.getDiagnosticById(diagnosticId)
                 _selectedDiagnostic.value = diagnostic
+
+                // Rechercher la maladie correspondante dans la BDD
+                if (diagnostic != null) {
+                    try {
+                        val maladie = maladieRepository.findByLabel(diagnostic.label)
+                        _selectedMaladie.value = maladie
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Erreur recherche maladie : ${e.message}")
+                        _selectedMaladie.value = null
+                    }
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur chargement diagnostic $diagnosticId : ${e.message}", e)
             }
@@ -111,7 +127,6 @@ class HistoryViewModel(
         viewModelScope.launch {
             try {
                 repository.deleteDiagnostic(diagnosticId)
-                // La liste se met à jour automatiquement via Flow
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur suppression diagnostic $diagnosticId : ${e.message}", e)
             }
@@ -122,11 +137,12 @@ class HistoryViewModel(
 
     class Factory(
         private val repository: DiagnosticRepository,
-        private val sessionPreferences: SessionPreferences
+        private val sessionPreferences: SessionPreferences,
+        private val maladieRepository: MaladieRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return HistoryViewModel(repository, sessionPreferences) as T
+            return HistoryViewModel(repository, sessionPreferences, maladieRepository) as T
         }
     }
 }
