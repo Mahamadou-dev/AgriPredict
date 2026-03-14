@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AgriPredict</string>
     <string name="home_title">AgriPredict</string>
@@ -9,6 +9,7 @@
     <string name="home_history">History</string>
     <string name="home_contact_expert">Contact an expert</string>
     <string name="home_about">About</string>
+    <string name="home_manage_parcelles">My plots</string>
     <string name="diagnostic_title">AI Diagnostic</string>
     <string name="diagnostic_take_photo">Take a photo</string>
     <string name="diagnostic_analyze">Analyze</string>
@@ -84,6 +85,27 @@
     <string name="profile_password_changed">Password changed!</string>
     <string name="profile_wrong_current_password">Current password is incorrect</string>
     <string name="profile_password_too_short">Min. 4 characters</string>
+    <string name="profile_created_at">Member since</string>
+
+    <!-- === Plots === -->
+    <string name="parcelle_title">My plots</string>
+    <string name="parcelle_add">Add a plot</string>
+    <string name="parcelle_add_title">New plot</string>
+    <string name="parcelle_add_subtitle">Describe your agricultural plot</string>
+    <string name="parcelle_name">Plot name</string>
+    <string name="parcelle_commune">Municipality</string>
+    <string name="parcelle_village">Village</string>
+    <string name="parcelle_ville">City</string>
+    <string name="parcelle_save">Save plot</string>
+    <string name="parcelle_skip">Later</string>
+    <string name="parcelle_empty_list">No plots registered</string>
+    <string name="parcelle_select">Select a plot</string>
+    <string name="parcelle_required">Please add a plot first</string>
+    <string name="parcelle_delete_title">Delete plot</string>
+    <string name="parcelle_delete_confirm">Delete plot "%1$s"?</string>
+    <string name="field_required">This field is required</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
     <string name="error_generic">An error occurred</string>
     <string name="retry">Retry</string>
     <string name="ok">OK</string>

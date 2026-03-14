@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AgriPredict</string>
     <string name="home_title">AgriPredict</string>
@@ -9,6 +9,7 @@
     <string name="home_history">Taariki</string>
     <string name="home_contact_expert">Bay boro se sala&#x014B;</string>
     <string name="home_about">Boro bo&#x014B;</string>
+    <string name="home_manage_parcelles">Ay farey</string>
     <string name="diagnostic_title">AI ceeci bay</string>
     <string name="diagnostic_take_photo">Foto kaa</string>
     <string name="diagnostic_analyze">Ceeci</string>
@@ -84,6 +85,27 @@
     <string name="profile_password_changed">Siri senni barmayandi!</string>
     <string name="profile_wrong_current_password">Siri senni sohon si bori</string>
     <string name="profile_password_too_short">Harfu 4 ikkey</string>
+    <string name="profile_created_at">Membra za</string>
+
+    <!-- === Farey === -->
+    <string name="parcelle_title">Ay farey</string>
+    <string name="parcelle_add">Fari tonton</string>
+    <string name="parcelle_add_title">Fari taaga</string>
+    <string name="parcelle_add_subtitle">Ni fari sanba ka bay</string>
+    <string name="parcelle_name">Fari ma&#x014B;</string>
+    <string name="parcelle_commune">Komondi</string>
+    <string name="parcelle_village">Kwaaray</string>
+    <string name="parcelle_ville">Gallu</string>
+    <string name="parcelle_save">Fari gaabu</string>
+    <string name="parcelle_skip">Kala nd&#x2019;a</string>
+    <string name="parcelle_empty_list">Fari kul si no</string>
+    <string name="parcelle_select">Fari suuba</string>
+    <string name="parcelle_required">Wa fari fo tonton da</string>
+    <string name="parcelle_delete_title">Fari tuusu</string>
+    <string name="parcelle_delete_confirm">Fari « %1$s » tuusu?</string>
+    <string name="field_required">Noo wo&#x014B; ga hima</string>
+    <string name="action_delete">Tuusu</string>
+    <string name="action_cancel">Naŋ</string>
     <string name="error_generic">Firka foo bangay</string>
     <string name="retry">Ceeci koyne</string>
     <string name="ok">Ayyo</string>

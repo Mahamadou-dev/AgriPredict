@@ -39,6 +39,9 @@ import com.example.agripredict.ui.screens.history.HistoryDetailScreen
 import com.example.agripredict.ui.screens.history.HistoryScreen
 import com.example.agripredict.ui.screens.history.HistoryViewModel
 import com.example.agripredict.ui.screens.home.HomeScreen
+import com.example.agripredict.ui.screens.parcelle.AddParcelleScreen
+import com.example.agripredict.ui.screens.parcelle.ParcelleScreen
+import com.example.agripredict.ui.screens.parcelle.ParcelleViewModel
 import com.example.agripredict.ui.screens.settings.SettingsScreen
 
 /**
@@ -148,7 +151,8 @@ fun AgriPredictNavGraph(navController: NavHostController) {
                             }
                         },
                         onRegistrationSuccess = {
-                            navController.navigate(Screen.Home.route) {
+                            // Après inscription → ajouter une parcelle
+                            navController.navigate(Screen.AddParcelle.route) {
                                 popUpTo(Screen.Register.route) { inclusive = true }
                             }
                         }
@@ -183,7 +187,48 @@ fun AgriPredictNavGraph(navController: NavHostController) {
                         onNavigateToAbout = { navController.navigate(Screen.About.route) },
                         onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                         onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
+                        onNavigateToParcelles = { navController.navigate(Screen.Parcelles.route) },
                         userName = userName
+                    )
+                }
+
+                // Gestion des parcelles
+                composable(Screen.Parcelles.route) {
+                    val parcelleViewModel: ParcelleViewModel = viewModel(
+                        factory = appContainer.parcelleViewModelFactory
+                    )
+                    ParcelleScreen(
+                        viewModel = parcelleViewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToAdd = { navController.navigate(Screen.AddParcelle.route) }
+                    )
+                }
+
+                // Ajout d'une parcelle (depuis liste OU après inscription)
+                composable(Screen.AddParcelle.route) {
+                    val parcelleViewModel: ParcelleViewModel = viewModel(
+                        factory = appContainer.parcelleViewModelFactory
+                    )
+                    // showSkipButton si on vient de l'inscription (pas de back stack vers Home)
+                    val fromRegistration = navController.previousBackStackEntry?.destination?.route != Screen.Parcelles.route
+                    AddParcelleScreen(
+                        viewModel = parcelleViewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onParcelleSaved = {
+                            if (fromRegistration) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.AddParcelle.route) { inclusive = true }
+                                }
+                            } else {
+                                navController.popBackStack()
+                            }
+                        },
+                        showSkipButton = fromRegistration,
+                        onSkip = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.AddParcelle.route) { inclusive = true }
+                            }
+                        }
                     )
                 }
 

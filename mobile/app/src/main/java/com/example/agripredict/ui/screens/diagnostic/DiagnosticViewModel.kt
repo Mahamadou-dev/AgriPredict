@@ -8,6 +8,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.agripredict.data.local.dao.ParcelleDao
+import com.example.agripredict.data.local.entity.ParcelleEntity
 import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.domain.model.DiagnosticResult
 import com.example.agripredict.domain.model.Maladie
@@ -40,7 +42,8 @@ class DiagnosticViewModel(
     private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
     private val appContext: Context,
     private val sessionPreferences: SessionPreferences,
-    private val maladieRepository: MaladieRepository
+    private val maladieRepository: MaladieRepository,
+    private val parcelleDao: ParcelleDao
 ) : ViewModel() {
 
     companion object {
@@ -54,6 +57,41 @@ class DiagnosticViewModel(
     /** Maladie trouvée dans la BDD correspondant au résultat IA */
     private val _matchedMaladie = MutableStateFlow<Maladie?>(null)
     val matchedMaladie: StateFlow<Maladie?> = _matchedMaladie.asStateFlow()
+
+    /** Parcelles de l'utilisateur connecté */
+    private val _parcelles = MutableStateFlow<List<ParcelleEntity>>(emptyList())
+    val parcelles: StateFlow<List<ParcelleEntity>> = _parcelles.asStateFlow()
+
+    /** ID de la parcelle sélectionnée pour ce diagnostic */
+    private val _selectedParcelleId = MutableStateFlow<String?>(null)
+    val selectedParcelleId: StateFlow<String?> = _selectedParcelleId.asStateFlow()
+
+    init {
+        // Charger les parcelles de l'utilisateur connecté
+        viewModelScope.launch {
+            try {
+                val userId = sessionPreferences.userId.first()
+                if (userId.isNotEmpty()) {
+                    parcelleDao.observeByUser(userId).collect { list ->
+                        _parcelles.value = list
+                        // Auto-sélectionner si une seule parcelle
+                        if (list.size == 1 && _selectedParcelleId.value == null) {
+                            _selectedParcelleId.value = list.first().id
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Erreur chargement parcelles : ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Sélectionne une parcelle pour le diagnostic en cours.
+     */
+    fun selectParcelle(parcelleId: String) {
+        _selectedParcelleId.value = parcelleId
+    }
 
     // Données temporaires du diagnostic en cours
     private var currentBitmap: Bitmap? = null
@@ -189,7 +227,8 @@ class DiagnosticViewModel(
                     label = result.label,
                     confidence = result.confidence,
                     modelVersion = if (result.isDemo) "demo" else "v1.0",
-                    imagePath = currentImagePath
+                    imagePath = currentImagePath,
+                    parcelleId = _selectedParcelleId.value
                 )
 
                 saveDiagnosticUseCase(diagnosticResult)
@@ -211,6 +250,9 @@ class DiagnosticViewModel(
         currentImagePath = ""
         currentResult = null
         _matchedMaladie.value = null
+        // Re-auto-select si une seule parcelle
+        val list = _parcelles.value
+        _selectedParcelleId.value = if (list.size == 1) list.first().id else null
         _uiState.value = DiagnosticUiState.Idle
     }
 
@@ -244,12 +286,13 @@ class DiagnosticViewModel(
         private val saveDiagnosticUseCase: SaveDiagnosticUseCase,
         private val appContext: Context,
         private val sessionPreferences: SessionPreferences,
-        private val maladieRepository: MaladieRepository
+        private val maladieRepository: MaladieRepository,
+        private val parcelleDao: ParcelleDao
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DiagnosticViewModel::class.java)) {
-                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext, sessionPreferences, maladieRepository) as T
+                return DiagnosticViewModel(classifier, saveDiagnosticUseCase, appContext, sessionPreferences, maladieRepository, parcelleDao) as T
             }
             throw IllegalArgumentException("ViewModel inconnu : ${modelClass.name}")
         }

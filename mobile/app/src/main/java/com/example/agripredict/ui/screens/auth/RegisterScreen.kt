@@ -27,11 +27,11 @@ import com.example.agripredict.R
 /**
  * Écran d'inscription pour les agriculteurs.
  *
- * Formulaire en 3 sections visuelles :
- * 1. 👤 Identité (nom, téléphone)
- * 2. 📍 Localisation (commune, village)
- * 3. 🔒 Sécurité (mot de passe, défaut 123456)
+ * Formulaire simplifié en 2 sections :
+ * 1. 👤 Identité (nom & prénom, téléphone)
+ * 2. 🔒 Sécurité (mot de passe, défaut 123456)
  *
+ * Les parcelles (commune, village, ville) sont ajoutées après l'inscription.
  * Design moderne avec header gradient et cartes séparées.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,10 +42,8 @@ fun RegisterScreen(
     onRegistrationSuccess: () -> Unit
 ) {
     // Champs du formulaire
-    var nom by remember { mutableStateOf("") }
+    var nomPrenom by remember { mutableStateOf("") }
     var telephone by remember { mutableStateOf("") }
-    var commune by remember { mutableStateOf("") }
-    var village by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -164,10 +162,10 @@ fun RegisterScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Champ Nom
+                        // Champ Nom & Prénom
                         OutlinedTextField(
-                            value = nom,
-                            onValueChange = { nom = it; nomError = false },
+                            value = nomPrenom,
+                            onValueChange = { nomPrenom = it; nomError = false },
                             label = { Text(stringResource(R.string.auth_name)) },
                             leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
                             isError = nomError,
@@ -201,70 +199,7 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // === Section 2 : Localisation ===
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        // Titre section
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                modifier = Modifier.size(32.dp),
-                                shape = CircleShape,
-                                color = Color(0xFFE3F2FD)
-                            ) {
-                                Icon(
-                                    Icons.Filled.Place,
-                                    contentDescription = null,
-                                    tint = Color(0xFF1565C0),
-                                    modifier = Modifier.padding(6.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = stringResource(R.string.auth_section_location),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Champ Commune
-                        OutlinedTextField(
-                            value = commune,
-                            onValueChange = { commune = it },
-                            label = { Text(stringResource(R.string.auth_commune)) },
-                            leadingIcon = { Icon(Icons.Filled.LocationCity, contentDescription = null) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        // Champ Village
-                        OutlinedTextField(
-                            value = village,
-                            onValueChange = { village = it },
-                            label = { Text(stringResource(R.string.auth_village)) },
-                            leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // === Section 3 : Sécurité ===
+                // === Section 2 : Sécurité ===
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -381,11 +316,11 @@ fun RegisterScreen(
                 // === Bouton S'inscrire ===
                 Button(
                     onClick = {
-                        nomError = nom.isBlank()
+                        nomError = nomPrenom.isBlank()
                         telephoneError = telephone.length < 8
                         if (!nomError && !telephoneError) {
                             val finalPassword = password.ifBlank { "123456" }
-                            viewModel.register(nom.trim(), telephone.trim(), commune.trim(), village.trim(), finalPassword)
+                            viewModel.register(nomPrenom.trim(), telephone.trim(), finalPassword)
                         }
                     },
                     modifier = Modifier

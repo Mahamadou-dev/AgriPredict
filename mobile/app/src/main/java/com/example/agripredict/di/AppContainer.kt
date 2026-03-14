@@ -19,6 +19,7 @@ import com.example.agripredict.ui.screens.auth.AuthViewModel
 import com.example.agripredict.ui.screens.diagnostic.DiagnosticViewModel
 import com.example.agripredict.ui.screens.diseases.DiseasesViewModel
 import com.example.agripredict.ui.screens.history.HistoryViewModel
+import com.example.agripredict.ui.screens.parcelle.ParcelleViewModel
 import com.example.agripredict.util.TFLiteClassifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +58,7 @@ class AppContainer(private val context: Context) {
     val traitementDao by lazy { database.traitementDao() }
     val alerteDao by lazy { database.alerteDao() }
     val modeleIADao by lazy { database.modeleIADao() }
+    val parcelleDao by lazy { database.parcelleDao() }
 
     // === Repositories ===
     val diagnosticRepository: DiagnosticRepository by lazy {
@@ -94,7 +96,8 @@ class AppContainer(private val context: Context) {
             saveDiagnosticUseCase = saveDiagnosticUseCase,
             appContext = context,
             sessionPreferences = sessionPreferences,
-            maladieRepository = maladieRepository
+            maladieRepository = maladieRepository,
+            parcelleDao = parcelleDao
         )
     }
 
@@ -134,6 +137,16 @@ class AppContainer(private val context: Context) {
     val alertsViewModelFactory by lazy {
         AlertsViewModel.Factory(
             alerteDao = alerteDao
+        )
+    }
+
+    /**
+     * Factory pour créer le ParcelleViewModel avec ses dépendances.
+     */
+    val parcelleViewModelFactory by lazy {
+        ParcelleViewModel.Factory(
+            parcelleDao = parcelleDao,
+            sessionPreferences = sessionPreferences
         )
     }
 

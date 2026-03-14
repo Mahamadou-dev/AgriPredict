@@ -1,8 +1,8 @@
-# 🌾 AgriPredict — Récapitulatif du Projet
+# 🌾 AgriPredict — Récapitulatif du Projet Mobile
 
 > **Application mobile agricole intelligente**
 > Projet de fin d'études (PFE) — Licence en Génie Logiciel
-> Dernière mise à jour : 10 mars 2026 — **Phase 7 bis implémentée — Amélioration UI/UX globale + transitions fluides** 🚀
+> Dernière mise à jour : 13 mars 2026 — **Phase 8 : Refactoring Parcelles + Cohérence Backend** 🚀
 
 ---
 
@@ -73,12 +73,13 @@ app/src/main/java/com/example/agripredict/
 │
 ├── 📂 data/                        ← COUCHE DONNÉES
 │   ├── 📂 local/                   ← Base de données Room
-│   │   ├── AgriPredictDatabase.kt  ← Database Room (9 tables)
+│   │   ├── AgriPredictDatabase.kt  ← Database Room (10 tables, version 3)
 │   │   ├── Converters.kt          ← TypeConverters (SyncStatus ↔ String)
-│   │   ├── DatabaseSeeder.kt      ← 🆕 Pré-chargement 24 maladies + 41 traitements + 6 alertes
-│   │   ├── 📂 entity/             ← 9 Entities (@Entity Room)
-│   │   │   ├── UserEntity.kt
-│   │   │   ├── DiagnosticEntity.kt
+│   │   ├── DatabaseSeeder.kt      ← Pré-chargement 24 maladies + 41 traitements + 6 alertes
+│   │   ├── 📂 entity/             ← 10 Entities (@Entity Room)
+│   │   │   ├── UserEntity.kt      ← 🔄 Simplifié (nomPrenom, motDePasseHash, createdAt)
+│   │   │   ├── ParcelleEntity.kt  ← 🆕 Parcelle agricole (FK→User, commune, village, ville)
+│   │   │   ├── DiagnosticEntity.kt ← 🔄 + parcelleId FK
 │   │   │   ├── ImageEntity.kt
 │   │   │   ├── LocationEntity.kt
 │   │   │   ├── PredictionEntity.kt
@@ -86,8 +87,9 @@ app/src/main/java/com/example/agripredict/
 │   │   │   ├── TraitementEntity.kt
 │   │   │   ├── AlerteEntity.kt
 │   │   │   └── ModeleIAEntity.kt
-│   │   └── 📂 dao/                ← 9 DAOs (CRUD complet)
-│   │       ├── UserDao.kt          ← + getByTelephone() + countByTelephone()
+│   │   └── 📂 dao/                ← 10 DAOs (CRUD complet)
+│   │       ├── UserDao.kt
+│   │       ├── ParcelleDao.kt     ← 🆕 CRUD + observeByUser() + countByUser()
 │   │       ├── DiagnosticDao.kt
 │   │       ├── ImageDao.kt
 │   │       ├── LocationDao.kt
@@ -102,8 +104,8 @@ app/src/main/java/com/example/agripredict/
 │   │   │   └── AgriPredictApi.kt   ← Interface Retrofit (endpoints)
 │   │   └── 📂 dto/
 │   │       ├── 📂 uplink/          ← DTOs envoi → serveur
-│   │       │   ├── UserSyncDTO.kt
-│   │       │   └── DiagnosticUploadDTO.kt
+│   │       │   ├── UserSyncDTO.kt  ← 🔄 + ParcelleSyncDTO (remplace commune/village)
+│   │       │   └── DiagnosticUploadDTO.kt ← 🔄 + parcelleId
 │   │       └── 📂 downlink/        ← DTOs réception ← serveur
 │   │           └── DownlinkDTOs.kt
 │   │
@@ -132,18 +134,22 @@ app/src/main/java/com/example/agripredict/
 │   │   ├── Theme.kt                ← Thème clair/sombre
 │   │   └── Type.kt                 ← Typographie
 │   ├── 📂 navigation/
-│   │   ├── Screen.kt               ← 12 routes (sealed class + HistoryDetail)
-│   │   └── AgriPredictNavGraph.kt  ← Graphe de navigation + auth conditionnelle
+│   │   ├── Screen.kt               ← 14 routes (+ Parcelles, AddParcelle)
+│   │   └── AgriPredictNavGraph.kt  ← Graphe de navigation + auth + parcelles post-inscription
 │   ├── 📂 screens/
-│   │   ├── 📂 home/HomeScreen.kt           ← Grille d'accueil (6 boutons + profil)
+│   │   ├── 📂 home/HomeScreen.kt           ← Grille d'accueil (7 boutons : + Mes parcelles)
 │   │   ├── 📂 diagnostic/
-│   │   │   ├── DiagnosticScreen.kt         ← Écran diagnostic IA (caméra + galerie)
-│   │   │   └── DiagnosticViewModel.kt      ← ViewModel (6 états) ⚡ Corrigé : userId vérifié
+│   │   │   ├── DiagnosticScreen.kt         ← Écran diagnostic IA + sélecteur parcelle obligatoire
+│   │   │   └── DiagnosticViewModel.kt      ← ViewModel + ParcelleDao, sélection parcelle
 │   │   ├── 📂 auth/
-│   │   │   ├── AuthViewModel.kt            ← ViewModel auth ⚡ Corrigé : try-catch robuste
+│   │   │   ├── AuthViewModel.kt            ← 🔄 register(nomPrenom, tel, mdp) simplifié
 │   │   │   ├── LoginScreen.kt              ← Écran connexion (téléphone + mot de passe)
-│   │   │   ├── RegisterScreen.kt           ← Écran inscription agriculteur
-│   │   │   └── ProfileScreen.kt            ← Écran profil + édition + changer MDP + déconnexion
+│   │   │   ├── RegisterScreen.kt           ← 🔄 Simplifié (2 sections : identité + sécurité)
+│   │   │   └── ProfileScreen.kt            ← 🔄 Sans commune/village (géré par parcelles)
+│   │   ├── 📂 parcelle/                    ← 🆕 NOUVEAU MODULE
+│   │   │   ├── ParcelleViewModel.kt        ← 🆕 CRUD parcelles + observe Flow
+│   │   │   ├── ParcelleScreen.kt           ← 🆕 Liste parcelles + FAB ajouter + supprimer
+│   │   │   └── AddParcelleScreen.kt        ← 🆕 Formulaire ajout (nom, commune, village, ville)
 │   │   ├── 📂 diseases/
 │   │   │   ├── DiseasesScreen.kt           ← 🆕 Base de connaissances (groupée par plante, expandable)
 │   │   │   └── DiseasesViewModel.kt        ← 🆕 ViewModel avec recherche + FilterChips par plante + observe MaladieRepository
@@ -171,7 +177,7 @@ app/src/main/java/com/example/agripredict/
 │   └── NetworkChecker.kt           ← Détection connectivité
 │
 ├── 📂 di/                           ← INJECTION DE DÉPENDANCES
-│   └── AppContainer.kt             ← ⚡ +maladieRepo, +diseasesVM, +alertsVM, +DatabaseSeeder init
+│   └── AppContainer.kt             ← +parcelleDao, +parcelleVM, +6 ViewModelFactories, +Seeder
 │
 └── 📂 util/                         ← UTILITAIRES
     ├── LocaleManager.kt            ← Changement de langue dynamique
@@ -179,10 +185,10 @@ app/src/main/java/com/example/agripredict/
     └── LabelFormatter.kt           ← Formatage des labels IA bruts
 
 res/                                  ← RESSOURCES i18n
-├── values/strings.xml               ← 🇫🇷 Français (~185 clés)
-├── values-en/strings.xml            ← 🇬🇧 English (~185 clés)
-├── values-ha/strings.xml            ← 🇳🇬 Hausa (~185 clés)
-├── values-dje/strings.xml           ← 🇳🇪 Zarma (~185 clés)
+├── values/strings.xml               ← 🇫🇷 Français (~205 clés)
+├── values-en/strings.xml            ← 🇬🇧 English (~205 clés)
+├── values-ha/strings.xml            ← 🇳🇬 Hausa (~205 clés)
+├── values-dje/strings.xml           ← 🇳🇪 Zarma (~205 clés)
 └── xml/locales_config.xml           ← Config Per-App Language (Android 13+)
 ```
 
@@ -350,26 +356,37 @@ res/                                  ← RESSOURCES i18n
 ### Phase 7 bis — Amélioration UI/UX globale ✅ 🆕🎨
 | Composant | Statut | Détail |
 |-----------|--------|--------|
-| **Transitions de navigation** | ✅ 🆕 | Slide-in/out horizontal fluide + fade entre tous les écrans (NavHost global) |
-| **AnimationUtils.kt** | ✅ 🆕 | Bibliothèque d'animations réutilisables (slide, fade, expand) |
-| **SharedComponents.kt** | ✅ 🆕 | Composants partagés : `ConfidenceBar`, `StatusBadge`, `TraitementCard`, `EmptyStateComponent` |
-| **HomeScreen — Animations** | ✅ 🆕 | Bannière avec animation d'apparition (slideIn + fadeIn) |
-| **DiagnosticScreen — Résultat enrichi** | ✅ 🆕 | Après analyse IA → affiche description maladie BDD + traitements recommandés + barre confiance animée |
-| **DiagnosticViewModel — MaladieRepository** | ✅ 🆕 | `matchedMaladie` Flow : recherche la maladie correspondante dans la BDD après classification IA |
-| **MaladieRepositoryImpl — findByLabel()** | ✅ 🆕 | Table de mapping 24 labels IA → 24 IDs maladies BDD (cassava___cbb → id=1, Tomato___Late_blight → id=18…) |
-| **HistoryDetailScreen — Traitements** | ✅ 🆕 | Même design que résultat diagnostic : image + badge plante + statut sain/malade + confiance + description + traitements |
-| **HistoryViewModel — MaladieRepository** | ✅ 🆕 | `selectedMaladie` Flow : charge les traitements correspondants au diagnostic sélectionné |
-| **ExpertScreen — Annuaire** | ✅ 🆕 | 5 experts avec gros boutons 📞 Appeler et 💬 SMS (Intent.ACTION_DIAL + SENDTO), formulaire email en section dépliable |
-| **ExpertData.kt** | ✅ 🆕 | Données statiques : 5 experts (Dr. Ibrahim Moussa, Mme Aïssa Abdou…) avec spécialité, téléphone, zone |
-| **DiseasesScreen — FilterChips** | ✅ 🆕 | Chips par catégorie de plante (Manioc 🌿, Maïs 🌾, Tomate 🍅, Poivron 🌶️, Pomme de terre 🥔) + recherche + groupement |
-| **DiseasesScreen — Expandable cards** | ✅ 🆕 | Cartes dépliables avec `animateContentSize` : description + traitements avec dosages (composant `TraitementCard` partagé) |
-| **DiseasesViewModel — FilterChips** | ✅ 🆕 | `selectedPlant` + `availablePlants` Flows pour filtre par catégorie de plante |
-| **AlertsScreen — Tri et filtre** | ✅ 🆕 | FilterChips par gravité (Toutes/Élevée/Moyenne/Faible) + menu DropdownMenu tri (Date/Gravité/Zone) |
-| **AlertsViewModel — Tri + filtre** | ✅ 🆕 | `sortOption` (DATE/GRAVITY/ZONE) + `gravityFilter` (ALL/HIGH/MEDIUM/LOW) combinés avec `combine()` |
-| **AlertsScreen — Cartes** | ✅ 🆕 | Badge % gravité coloré, icône zone, date, expiration |
-| **AppContainer — MaladieRepository** | ✅ 🆕 | Injecté dans DiagnosticViewModel.Factory et HistoryViewModel.Factory |
-| **i18n enrichi** | ✅ 🆕 | +29 nouvelles clés dans 4 langues (traitements diag, annuaire expert, tri alertes, catégories maladies) |
-| Build validé | ✅ | `BUILD SUCCESSFUL` — 0 erreurs |
+| **Transitions de navigation** | ✅ | Slide-in/out horizontal fluide + fade entre tous les écrans |
+| **DiagnosticScreen — Résultat enrichi** | ✅ | Après analyse IA → description maladie BDD + traitements recommandés |
+| **MaladieRepositoryImpl — findByLabel()** | ✅ | 24 labels IA → 24 IDs maladies BDD |
+| **DiseasesScreen — FilterChips** | ✅ | Chips par catégorie de plante + expandable cards |
+| **AlertsScreen — Tri et filtre** | ✅ | FilterChips gravité + menu tri (date/gravité/zone) |
+| Build validé | ✅ | `BUILD SUCCESSFUL` |
+
+### Phase 8 — Refactoring Parcelles + Cohérence Backend ✅ 🆕🌾
+| Composant | Statut | Détail |
+|-----------|--------|--------|
+| **UserEntity simplifié** | ✅ 🔄 | `nomPrenom`, `motDePasseHash`, `createdAt` — supprimé `email`, `role`, `commune`, `village`, `lastLogin` |
+| **ParcelleEntity créé** | ✅ 🆕 | `id`, `nomParcelle`, `commune`, `village`, `ville`, `utilisateurId` (FK→User CASCADE) |
+| **DiagnosticEntity + parcelleId** | ✅ 🔄 | FK → ParcelleEntity (SET_NULL), indexé |
+| **ParcelleDao créé** | ✅ 🆕 | insert, update, delete, getById, getByUserId, observeByUser, countByUser |
+| **AgriPredictDatabase v3** | ✅ 🔄 | 10 tables, version 3, + ParcelleEntity + parcelleDao |
+| **AuthViewModel simplifié** | ✅ 🔄 | register(nomPrenom, tel, mdp), updateProfile(nomPrenom, tel), login avec `motDePasseHash` |
+| **ParcelleViewModel créé** | ✅ 🆕 | addParcelle, updateParcelle, deleteParcelle, observe Flow, Factory |
+| **DiagnosticViewModel + Parcelle** | ✅ 🔄 | Injecte ParcelleDao, charge parcelles, sélection parcelle, saveDiagnostic exige parcelle |
+| **ParcelleScreen créé** | ✅ 🆕 | Liste parcelles (LazyColumn), FAB ajouter, dialog supprimer, état vide |
+| **AddParcelleScreen créé** | ✅ 🆕 | Formulaire (nom*, commune, village, ville), header gradient, bouton "Plus tard" post-inscription |
+| **RegisterScreen simplifié** | ✅ 🔄 | 2 sections (identité + sécurité), supprimé section localisation |
+| **ProfileScreen simplifié** | ✅ 🔄 | Supprimé commune/village/rôle, ajouté "Membre depuis" |
+| **HomeScreen + Parcelles** | ✅ 🔄 | Nouveau bouton "Mes parcelles" (icône Terrain) dans la grille |
+| **DiagnosticScreen + sélecteur** | ✅ 🔄 | Dropdown sélecteur parcelle avant sauvegarde, désactivé si aucune parcelle |
+| **Navigation post-inscription** | ✅ 🔄 | Inscription → AddParcelle (avec "Plus tard") → Home |
+| **Screen.kt + 2 routes** | ✅ 🔄 | + Parcelles, + AddParcelle (14 routes au total) |
+| **AppContainer + parcelle** | ✅ 🔄 | + parcelleDao, + parcelleViewModelFactory, DiagnosticVM.Factory + parcelleDao |
+| **DTOs synchronisation** | ✅ 🔄 | UserSyncDTO → nomPrenom + parcelles[]. DiagnosticUploadDTO + parcelleId |
+| **DiagnosticResult + parcelleId** | ✅ 🔄 | Domaine model enrichi |
+| **DiagnosticRepositoryImpl** | ✅ 🔄 | Passe parcelleId dans saveDiagnostic et enrichDiagnostic |
+| **i18n Parcelles (4 langues)** | ✅ 🆕 | ~20 nouvelles clés (parcelle_*, field_required, action_*) en FR/EN/HA/DJE |
 
 ---
 
@@ -517,48 +534,53 @@ Mode sombre Android → Thème s'adapte
 
 ## 🏥 Santé du projet
 
-### Bilan de l'audit du 10 mars 2026
+### Bilan de l'audit du 13 mars 2026
 
-| Critère | Avant audit | Après Phase 7 bis |
+| Critère | Avant refactoring | Après Phase 8 |
 |---------|-------------|-------------|
 | Build | ✅ PASS | ✅ PASS |
 | Erreurs compilation | 0 | 0 |
-| Sauvegarde diagnostic | ❌ CRASH FK | ✅ CORRIGÉ |
-| Démarrage app | ⚠️ Fragile | ✅ ROBUSTE |
-| Auth (toutes fonctions) | ⚠️ Sans protection | ✅ ROBUSTE |
-| Historique | ⚠️ Sans protection | ✅ FONCTIONNEL (UI + détail + traitements BDD) |
-| Base de connaissances | 🔲 Placeholder | ✅ FONCTIONNEL (24 maladies, FilterChips, expandable) |
-| Alertes | 🔲 Placeholder | ✅ FONCTIONNEL (6 alertes, tri, filtre gravité) |
-| Contact expert | 🔲 Placeholder | ✅ FONCTIONNEL (annuaire 5 experts, appel/SMS/email) |
-| À propos | 🔲 Placeholder | ✅ FONCTIONNEL (projet + auteur + stack) |
-| Diagnostic → Traitements | 🔲 Non connecté | ✅ CONNECTÉ (label IA → maladie BDD → traitements) |
-| Composants réutilisables | 🔲 Aucun | ✅ 4 composants (ConfidenceBar, StatusBadge, TraitementCard, EmptyState) |
-| Transitions navigation | 🔲 Aucune | ✅ Slide + fade entre tous les écrans |
+| Sauvegarde diagnostic | ✅ Fonctionnel | ✅ + Parcelle obligatoire |
+| Démarrage app | ✅ ROBUSTE | ✅ ROBUSTE |
+| Auth (toutes fonctions) | ✅ ROBUSTE | ✅ Simplifié (nomPrenom) |
+| Gestion des parcelles | 🔲 Inexistant | ✅ CRUD complet (3 écrans, 1 ViewModel) |
+| Inscription → Parcelle | 🔲 Inexistant | ✅ Redirection auto post-inscription |
+| Diagnostic → Parcelle | 🔲 Pas de lien | ✅ Sélecteur parcelle obligatoire avant save |
+| Historique | ✅ FONCTIONNEL | ✅ FONCTIONNEL |
+| Base de connaissances | ✅ FONCTIONNEL | ✅ FONCTIONNEL |
+| Alertes | ✅ FONCTIONNEL | ✅ FONCTIONNEL |
+| Contact expert | ✅ FONCTIONNEL | ✅ FONCTIONNEL |
+| Diagnostic → Traitements | ✅ CONNECTÉ | ✅ CONNECTÉ |
+| Composants réutilisables | ✅ 4 composants | ✅ 4 composants |
+| Transitions navigation | ✅ Slide + fade | ✅ Slide + fade |
 | Architecture Clean Arch | ✅ Solide | ✅ Solide |
-| MVVM | ✅ Solide | ✅ Solide (5 ViewModels) |
+| MVVM | ✅ 5 ViewModels | ✅ 6 ViewModels (+ ParcelleVM) |
 | Offline-first | ✅ Bon | ✅ Bon |
-| i18n | ✅ Complet | ✅ Complet (~185 clés/langue) |
+| i18n | ✅ ~185 clés/langue | ✅ ~205 clés/langue (+ parcelles) |
+| Cohérence DTOs mobile↔backend | ⚠️ Partielle | ✅ ALIGNÉ (UserSyncDTO + ParcelleSyncDTO + parcelleId) |
 
 ### Score de santé global : 🟢 9.5/10
 
 **Points forts :**
 - Architecture propre (Clean Architecture + MVVM)
-- ~70 fichiers Kotlin bien organisés
-- **Tous les écrans fonctionnels** avec UI/UX soignée
-- **Mapping IA → BDD** : le diagnostic affiche les traitements recommandés de la base de connaissances
-- **Composants réutilisables** : ConfidenceBar, StatusBadge, TraitementCard partagés entre Diagnostic, Historique, Maladies
+- ~78 fichiers Kotlin bien organisés
+- **Gestion des parcelles** : CRUD complet, sélection obligatoire avant diagnostic
+- **Flux inscription → parcelle** : redirection automatique avec option "Plus tard"
+- **Tous les écrans fonctionnels** (14 écrans, 0 placeholder)
+- **Mapping IA → BDD** : le diagnostic affiche les traitements recommandés
+- **Composants réutilisables** : ConfidenceBar, StatusBadge, TraitementCard
 - **Transitions fluides** entre tous les écrans (slide + fade)
-- **Annuaire experts** avec appel/SMS direct (fonctionne sans internet)
+- **Annuaire experts** avec appel/SMS direct
 - **FilterChips** interactifs sur Maladies et Alertes
 - Base de connaissances pré-chargée (24 maladies, 41 traitements, 6 alertes)
-- Gestion d'erreurs robuste (après corrections)
-- i18n 4 langues, ~185 clés par langue, 0 texte en dur
-- Transaction Room atomique pour sauvegarde multi-table
+- Gestion d'erreurs robuste (try-catch dans tous les ViewModels)
+- i18n 4 langues, ~205 clés par langue, 0 texte en dur
+- **DTOs alignés mobile ↔ backend** (UserSyncDTO, ParcelleSyncDTO, parcelleId)
 - Modèle IA fonctionnel avec mapping complet vers BDD
 
 **Points à améliorer (non-bloquants) :**
-- Sync non implémentée (Phase 8)
-- Pas de tests unitaires (Phase 10)
+- Sync non implémentée (squelette en place)
+- Pas de tests unitaires
 - `fallbackToDestructiveMigration` à remplacer en production
 
 ---
@@ -587,15 +609,19 @@ Mode sombre Android → Thème s'adapte
 17. 🚀 Contact expert               ✅ FAIT      —
 18. 🚀 À propos                     ✅ FAIT      —
 19. 🚀 DatabaseSeeder + wiring      ✅ FAIT      —
-20. 🎨 UI/UX Global + animations    ✅ FAIT      — ← NOUVEAU
-21. 🎨 Mapping IA→BDD traitements   ✅ FAIT      — ← NOUVEAU
-22. 🎨 Annuaire experts + SMS       ✅ FAIT      — ← NOUVEAU
-23. 🎨 FilterChips maladies+alertes ✅ FAIT      — ← NOUVEAU
-24. 🎨 Composants réutilisables     ✅ FAIT      — ← NOUVEAU
+20. 🎨 UI/UX Global + animations    ✅ FAIT      —
+21. 🎨 Mapping IA→BDD traitements   ✅ FAIT      —
+22. 🎨 Annuaire experts + SMS       ✅ FAIT      —
+23. 🎨 FilterChips maladies+alertes ✅ FAIT      —
+24. 🎨 Composants réutilisables     ✅ FAIT      —
+25. 🌾 Refactoring Parcelles        ✅ FAIT      — ← NOUVEAU
+26. 🌾 Cohérence DTOs backend       ✅ FAIT      — ← NOUVEAU
+27. 🌾 Sélecteur parcelle diag      ✅ FAIT      — ← NOUVEAU
+28. 🌾 Inscription → Parcelle       ✅ FAIT      — ← NOUVEAU
 ────────────────────────────────────────────────────────
-25. 🎯 Sync complète + Backend      🔲 NEXT     ★★★★
-26. Tests                           🔲           ★★★
-27. Finitions + polish              🔲           ★★
+29. 🎯 Sync complète                🔲 NEXT     ★★★★
+30. Tests                           🔲           ★★★
+31. Finitions + polish              🔲           ★★
 ────────────────────────────────────────────────────────
 ```
 
@@ -605,21 +631,25 @@ Mode sombre Android → Thème s'adapte
 
 | Fichier | Rôle |
 |---------|------|
-| `AppContainer.kt` | DI : Database, DAOs, Repos (Diagnostic+Maladie), IA, Auth, 5 ViewModels, Seeder |
-| `AgriPredictDatabase.kt` | 9 tables Room |
+| `AppContainer.kt` | DI : Database, DAOs, Repos, IA, Auth, 6 ViewModels, Seeder |
+| `AgriPredictDatabase.kt` | 10 tables Room (v3) |
+| `ParcelleEntity.kt` | 🆕 Entité parcelle (nomParcelle, commune, village, ville, FK→User) |
+| `ParcelleDao.kt` | 🆕 CRUD parcelles + observeByUser() Flow |
+| `ParcelleViewModel.kt` | 🆕 CRUD parcelles + observe Flow |
+| `ParcelleScreen.kt` | 🆕 Liste parcelles + FAB ajouter + supprimer |
+| `AddParcelleScreen.kt` | 🆕 Formulaire ajout parcelle (post-inscription ou depuis liste) |
+| `DiagnosticViewModel.kt` | 6 états, analyse IA, sélection parcelle, matchedMaladie, sauvegarde |
+| `DiagnosticScreen.kt` | Diagnostic IA + sélecteur parcelle obligatoire |
+| `AuthViewModel.kt` | Auth simplifié (nomPrenom, tel, mdp) + try-catch robuste |
+| `RegisterScreen.kt` | Inscription simplifiée (2 sections : identité + sécurité) |
+| `ProfileScreen.kt` | Profil simplifié (sans commune/village) |
 | `DatabaseSeeder.kt` | 24 maladies + 41 traitements + 6 alertes pré-chargés |
 | `DiagnosticRepositoryImpl.kt` | Transaction Room, 3 DAOs, ordre FK correct |
 | `MaladieRepositoryImpl.kt` | Combine MaladieDao + TraitementDao + mapping label IA → maladie BDD |
-| `DiagnosticViewModel.kt` | 6 états, analyse IA, matchedMaladie (traitements BDD), sauvegarde |
-| `AuthViewModel.kt` | Auth complète (try-catch robuste dans toutes les fonctions) |
-| `HistoryViewModel.kt` | Historique (try-catch, selectedMaladie pour traitements dans détail) |
-| `DiseasesViewModel.kt` | FilterChips par plante + recherche + observe MaladieRepository |
-| `AlertsViewModel.kt` | Tri (date/gravité/zone) + filtre gravité + observe AlerteDao |
 | `TFLiteClassifier.kt` | Moteur IA TFLite + mode démo |
 | `SharedComponents.kt` | ConfidenceBar, StatusBadge, TraitementCard, EmptyStateComponent |
-| `ExpertData.kt` | Annuaire : 5 experts (nom, spécialité, téléphone, zone) |
 | `SessionPreferences.kt` | DataStore session (userId, isLoggedIn) |
-| `AgriPredictNavGraph.kt` | 12 routes + auth conditionnelle + transitions slide/fade |
+| `AgriPredictNavGraph.kt` | 14 routes + auth + parcelle post-inscription + transitions |
 
 ---
 
@@ -627,15 +657,15 @@ Mode sombre Android → Thème s'adapte
 
 | Métrique | Valeur |
 |----------|--------|
-| Fichiers Kotlin | ~72 fichiers |
-| Tables Room | 9 |
-| DAOs | 9 |
-| Écrans UI | 12 (tous fonctionnels, 0 placeholder) |
-| ViewModels | 5 (Diagnostic, Auth, History, Diseases, Alerts) |
+| Fichiers Kotlin | ~78 fichiers |
+| Tables Room | 10 |
+| DAOs | 10 |
+| Écrans UI | 14 (tous fonctionnels, 0 placeholder) |
+| ViewModels | 6 (Diagnostic, Auth, History, Diseases, Alerts, Parcelle) |
 | Composants réutilisables | 4 (ConfidenceBar, StatusBadge, TraitementCard, EmptyState) |
 | Langues | 4 (FR, EN, HA, DJE) |
-| Clés i18n par langue | ~185 (identique dans les 4 langues) |
-| Routes navigation | 12 |
+| Clés i18n par langue | ~205 |
+| Routes navigation | 14 |
 | Maladies pré-chargées | 24 (matching 24 classes IA) |
 | Traitements pré-chargés | 41 |
 | Alertes pré-chargées | 6 |
@@ -643,34 +673,34 @@ Mode sombre Android → Thème s'adapte
 | Mapping labels IA → BDD | 24 (100% des classes couvertes) |
 | Bugs critiques corrigés | 2 (FK order + userId fallback) |
 | Bugs moyens corrigés | 3 (try-catch + factory manquant) |
-| Build status | ✅ BUILD SUCCESSFUL |
-| Erreurs compile | 0 |
 
 ---
 
 ## 👨‍🎓 Notes pour la soutenance
 
 - **Architecture** : Clean Architecture — séparation data/domain/ui
-- **MVVM** : StateFlow/collectAsState, 5 ViewModels
+- **MVVM** : StateFlow/collectAsState, 6 ViewModels
 - **Offline-first** : Room + DataStore, sync PENDING/SYNCED/FAILED
+- **Parcelles agricoles** : CRUD complet, chaque diagnostic lié à une parcelle, sélecteur obligatoire
+- **Flux inscription** : Inscription → Ajout parcelle (ou "Plus tard") → Accueil
 - **Base de connaissances** : 24 maladies + 41 traitements pré-chargés (DatabaseSeeder)
-- **Mapping IA → BDD** : Chaque label du modèle IA correspond à une maladie dans la BDD locale avec ses traitements
+- **Mapping IA → BDD** : Chaque label du modèle IA correspond à une maladie BDD avec ses traitements
 - **Composants réutilisables** : ConfidenceBar, StatusBadge, TraitementCard partagés entre 3 écrans
 - **Transitions fluides** : Slide + fade entre tous les écrans (NavHost global)
 - **Annuaire experts** : Appel téléphonique et SMS direct (fonctionne hors ligne)
 - **FilterChips** : Filtrage interactif par plante (Maladies) et par gravité (Alertes)
 - **Transaction Room** : Sauvegarde multi-table atomique (Diagnostic→Image→Prediction)
-- **Foreign Keys** : Insertions parent→enfant respectées
+- **Foreign Keys** : Insertions parent→enfant respectées (+ Parcelle→Diagnostic)
 - **Gestion d'erreurs** : try-catch dans tous les ViewModels
-- **i18n** : 4 langues (~185 clés chacune, toutes synchronisées) sans modifier le code source
+- **i18n** : 4 langues (~205 clés chacune) sans modifier le code source
 - **DI manuelle** : Choix pédagogique (plus simple que Hilt)
 - **Modèle IA** : MobileNetV2 INT8 quantifié, 24 classes, ~95% précision
-- **Preprocessing** : Pixels bruts [0,255] — Rescaling intégrée au modèle
-- **12 écrans** : Tous fonctionnels (0 placeholder)
+- **Cohérence mobile↔backend** : DTOs alignés (UserSyncDTO, ParcelleSyncDTO, parcelleId)
+- **14 écrans** : Tous fonctionnels (0 placeholder)
 - **UX agriculteur** : Gros boutons, icônes explicites, design adapté aux non-digitaux
 
 ---
 
-> 📌 **Prochain objectif :** Implémenter la synchronisation avec le backend
+> 📌 **Prochain objectif :** Implémenter la synchronisation complète avec le backend
 > Les SyncManager et SyncWorker sont en place (squelette) — il faut connecter l'API REST
-> L'UI/UX est maintenant complète et cohérente avec transitions fluides et données interconnectées
+> Les DTOs mobile et backend sont maintenant parfaitement alignés (parcelles incluses)

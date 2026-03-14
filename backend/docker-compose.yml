@@ -1,0 +1,61 @@
+# ============================================
+# Docker Compose pour AgriPredict
+# ============================================
+# Lance le backend API + PostgreSQL
+
+version: "3.9"
+
+services:
+  # ===========================================
+  # Base de données PostgreSQL
+  # ===========================================
+  db:
+    image: postgres:16-alpine
+    container_name: agripredict_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agripredict
+      POSTGRES_PASSWORD: agripredict
+      POSTGRES_DB: agripredict
+    volumes:
+      # Persistance des données
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Accessible sur localhost:5432 pour outils comme pgAdmin
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agripredict"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Backend API FastAPI
+  # ===========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agripredict_api
+    restart: unless-stopped
+    environment:
+      # URL de connexion à PostgreSQL
+      DATABASE_URL: postgresql+psycopg://agripredict:agripredict@db:5432/agripredict
+      # Clé secrète pour JWT (à changer en production!)
+      SECRET_KEY: change-me-in-production-avec-une-cle-longue-et-aleatoire
+      # Mode debug
+      DEBUG: "false"
+    ports:
+      # API accessible sur http://localhost:8000
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # En développement, décommentez pour hot-reload:
+    # volumes:
+    #   - .:/app
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Volume nommé pour la persistance des données PostgreSQL
+volumes:
+  postgres_data:

@@ -56,7 +56,8 @@ class DiagnosticRepositoryImpl(
                     id = result.id,
                     userId = result.userId,
                     date = result.date,
-                    syncStatus = result.syncStatus
+                    syncStatus = result.syncStatus,
+                    parcelleId = result.parcelleId
                 )
             )
 
@@ -151,6 +152,7 @@ class DiagnosticRepositoryImpl(
             userId = entity.userId,
             date = entity.date,
             syncStatus = entity.syncStatus,
+            parcelleId = entity.parcelleId,
             label = prediction?.label ?: "",
             confidence = prediction?.confidence ?: 0f,
             modelVersion = prediction?.modelVersion ?: "",

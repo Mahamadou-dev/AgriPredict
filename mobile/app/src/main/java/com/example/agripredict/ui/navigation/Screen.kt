@@ -40,6 +40,12 @@ sealed class Screen(val route: String) {
     /** Écran de profil utilisateur */
     data object Profile : Screen("profile")
 
+    /** Écran de gestion des parcelles */
+    data object Parcelles : Screen("parcelles")
+
+    /** Écran d'ajout d'une parcelle */
+    data object AddParcelle : Screen("add_parcelle")
+
     /** Écran de détail d'un diagnostic */
     data object HistoryDetail : Screen("history_detail/{diagnosticId}") {
         /** Crée la route avec l'ID du diagnostic */

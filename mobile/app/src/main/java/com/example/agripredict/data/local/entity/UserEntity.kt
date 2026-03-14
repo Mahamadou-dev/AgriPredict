@@ -7,21 +7,19 @@ import androidx.room.PrimaryKey
  * Table : UtilisateurLocal
  *
  * Stocke le profil de l'agriculteur en local.
- * Simplifié par rapport au serveur — le mobile n'a pas besoin
- * de toute la gestion des comptes.
+ * Simplifié — ne contient que l'identité et l'authentification.
+ *
+ * Les informations géographiques (commune, village, ville)
+ * sont désormais dans ParcelleEntity (relation 1:N).
  */
 @Entity(tableName = "utilisateur_local")
 data class UserEntity(
     @PrimaryKey
-    val id: String,                 // UUID
-    val nom: String,
-    val telephone: String,
-    val password: String = "123456", // Mot de passe léger (défaut : 123456)
-    val email: String = "",
-    val role: String = "",          // ex: "agriculteur", "technicien"
-    val commune: String = "",
-    val village: String = "",
+    val id: String,                                     // UUID
+    val nomPrenom: String,                              // Nom et prénom
+    val telephone: String,                              // Numéro unique (login)
+    val motDePasseHash: String = "123456",              // Mot de passe (défaut : 123456)
     val isActive: Boolean = true,
-    val lastLogin: Long? = null     // Timestamp du dernier login
+    val createdAt: Long = System.currentTimeMillis()    // Date de création
 )
 

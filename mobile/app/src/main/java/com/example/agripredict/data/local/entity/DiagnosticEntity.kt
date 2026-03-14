@@ -10,7 +10,7 @@ import com.example.agripredict.sync.SyncStatus
  * Table : DiagnosticLocal
  *
  * Enregistre chaque diagnostic effectué par l'agriculteur.
- * Contient les références vers l'image, la localisation et la prédiction.
+ * Contient les références vers l'image, la localisation, la prédiction et la parcelle.
  * Le champ syncStatus gère la synchronisation offline-first.
  */
 @Entity(
@@ -21,11 +21,18 @@ import com.example.agripredict.sync.SyncStatus
             parentColumns = ["id"],
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = ParcelleEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["parcelleId"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [
         Index(value = ["userId"]),
-        Index(value = ["syncStatus"])
+        Index(value = ["syncStatus"]),
+        Index(value = ["parcelleId"])
     ]
 )
 data class DiagnosticEntity(
@@ -34,6 +41,7 @@ data class DiagnosticEntity(
     val userId: String,                                 // FK → UtilisateurLocal
     val date: Long = System.currentTimeMillis(),        // Date du diagnostic
     val syncStatus: SyncStatus = SyncStatus.PENDING,    // PENDING / SYNCED / FAILED
+    val parcelleId: String? = null,                     // FK → ParcelleLocal
     val locationId: String? = null,                     // FK → LocationLocal (optionnel)
     val imageId: String? = null,                        // FK → ImageLocal (optionnel)
     val predictionId: String? = null,                   // FK → PredictionLocal (optionnel)

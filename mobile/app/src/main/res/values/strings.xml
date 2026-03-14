@@ -12,6 +12,7 @@
     <string name="home_history">Historique</string>
     <string name="home_contact_expert">Contacter un expert</string>
     <string name="home_about">À propos</string>
+    <string name="home_manage_parcelles">Mes parcelles</string>
 
     <!-- === Écran Diagnostic === -->
     <string name="diagnostic_title">Diagnostic IA</string>
@@ -98,6 +99,27 @@
     <string name="profile_password_changed">Mot de passe modifié !</string>
     <string name="profile_wrong_current_password">Mot de passe actuel incorrect</string>
     <string name="profile_password_too_short">Min. 4 caractères</string>
+    <string name="profile_created_at">Membre depuis</string>
+
+    <!-- === Parcelles === -->
+    <string name="parcelle_title">Mes parcelles</string>
+    <string name="parcelle_add">Ajouter une parcelle</string>
+    <string name="parcelle_add_title">Nouvelle parcelle</string>
+    <string name="parcelle_add_subtitle">Décrivez votre parcelle agricole</string>
+    <string name="parcelle_name">Nom de la parcelle</string>
+    <string name="parcelle_commune">Commune</string>
+    <string name="parcelle_village">Village</string>
+    <string name="parcelle_ville">Ville</string>
+    <string name="parcelle_save">Enregistrer la parcelle</string>
+    <string name="parcelle_skip">Plus tard</string>
+    <string name="parcelle_empty_list">Aucune parcelle enregistrée</string>
+    <string name="parcelle_select">Sélectionner une parcelle</string>
+    <string name="parcelle_required">Veuillez d\'abord ajouter une parcelle</string>
+    <string name="parcelle_delete_title">Supprimer la parcelle</string>
+    <string name="parcelle_delete_confirm">Supprimer la parcelle « %1$s » ?</string>
+    <string name="field_required">Ce champ est obligatoire</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_cancel">Annuler</string>
 
     <!-- === Général === -->
     <string name="loading">Chargement…</string>

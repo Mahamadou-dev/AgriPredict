@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AgriPredict</string>
     <string name="home_title">AgriPredict</string>
@@ -9,6 +9,7 @@
     <string name="home_history">Tarihi</string>
     <string name="home_contact_expert">Tuntu&#595;i masani</string>
     <string name="home_about">Game da mu</string>
+    <string name="home_manage_parcelles">Gonakin nawa</string>
     <string name="diagnostic_title">Bincike ta AI</string>
     <string name="diagnostic_take_photo">&#x0110;auki hoto</string>
     <string name="diagnostic_analyze">Bincika</string>
@@ -84,6 +85,27 @@
     <string name="profile_password_changed">An canja kalmar sirri!</string>
     <string name="profile_wrong_current_password">Kalmar sirri ta yanzu ba daidai ba</string>
     <string name="profile_password_too_short">Mafi &#x0199;arami haruffa 4</string>
+    <string name="profile_created_at">Memba tun</string>
+
+    <!-- === Gonakin === -->
+    <string name="parcelle_title">Gonakin nawa</string>
+    <string name="parcelle_add">&#x0198;ara gona</string>
+    <string name="parcelle_add_title">Sabuwar gona</string>
+    <string name="parcelle_add_subtitle">Bayyana gonar ka</string>
+    <string name="parcelle_name">Sunan gona</string>
+    <string name="parcelle_commune">Kwamitin</string>
+    <string name="parcelle_village">&#x0198;auye</string>
+    <string name="parcelle_ville">Birni</string>
+    <string name="parcelle_save">Ajiye gona</string>
+    <string name="parcelle_skip">Daga baya</string>
+    <string name="parcelle_empty_list">Babu gonakin da aka rubuta</string>
+    <string name="parcelle_select">Za&#x0253;i gona</string>
+    <string name="parcelle_required">Da fatan za a fara &#x0199;ara gona</string>
+    <string name="parcelle_delete_title">Share gona</string>
+    <string name="parcelle_delete_confirm">Share gona « %1$s » ?</string>
+    <string name="field_required">Wannan fili dole ne</string>
+    <string name="action_delete">Share</string>
+    <string name="action_cancel">Soke</string>
     <string name="error_generic">An samu kuskure</string>
     <string name="retry">Sake gwadawa</string>
     <string name="ok">OK</string>

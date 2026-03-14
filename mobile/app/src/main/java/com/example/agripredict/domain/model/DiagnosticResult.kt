@@ -13,6 +13,7 @@ data class DiagnosticResult(
     val userId: String,
     val date: Long,
     val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val parcelleId: String? = null,     // Parcelle associée au diagnostic
     // Prédiction IA
     val label: String = "",            // Code maladie détecté (ex: "MILDEW")
     val confidence: Float = 0f,        // 0.0 à 1.0

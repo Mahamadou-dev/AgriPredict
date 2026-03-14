@@ -142,17 +142,12 @@ fun ProfileScreen(
 
             // === Nom de l'utilisateur ===
             Text(
-                text = userProfile?.nom ?: "...",
+                text = userProfile?.nomPrenom ?: "...",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
-                text = userProfile?.role ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -173,30 +168,12 @@ fun ProfileScreen(
                         value = userProfile?.telephone ?: ""
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                    // Commune
-                    ProfileInfoRow(
-                        icon = Icons.Filled.LocationCity,
-                        label = stringResource(R.string.auth_commune),
-                        value = userProfile?.commune ?: ""
-                    )
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                    // Village
-                    ProfileInfoRow(
-                        icon = Icons.Filled.Place,
-                        label = stringResource(R.string.auth_village),
-                        value = userProfile?.village ?: ""
-                    )
-
-                    // Dernier login
-                    userProfile?.lastLogin?.let { timestamp ->
+                    // Date de création
+                    userProfile?.createdAt?.let { timestamp ->
                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                         ProfileInfoRow(
                             icon = Icons.Filled.Schedule,
-                            label = stringResource(R.string.profile_last_login),
+                            label = stringResource(R.string.profile_created_at),
                             value = formatDate(timestamp)
                         )
                     }
@@ -295,14 +272,12 @@ fun ProfileScreen(
     // === Dialogue de modification du profil ===
     if (showEditDialog) {
         EditProfileDialog(
-            currentNom = userProfile?.nom ?: "",
+            currentNom = userProfile?.nomPrenom ?: "",
             currentTelephone = userProfile?.telephone ?: "",
-            currentCommune = userProfile?.commune ?: "",
-            currentVillage = userProfile?.village ?: "",
             isLoading = profileUpdateState is ProfileUpdateState.Loading,
             onDismiss = { showEditDialog = false },
-            onSave = { nom, telephone, commune, village ->
-                viewModel.updateProfile(nom, telephone, commune, village)
+            onSave = { nomPrenom, telephone ->
+                viewModel.updateProfile(nomPrenom, telephone)
                 showEditDialog = false
             }
         )
@@ -329,16 +304,12 @@ fun ProfileScreen(
 private fun EditProfileDialog(
     currentNom: String,
     currentTelephone: String,
-    currentCommune: String,
-    currentVillage: String,
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onSave: (nom: String, telephone: String, commune: String, village: String) -> Unit
+    onSave: (nomPrenom: String, telephone: String) -> Unit
 ) {
-    var nom by remember { mutableStateOf(currentNom) }
+    var nomPrenom by remember { mutableStateOf(currentNom) }
     var telephone by remember { mutableStateOf(currentTelephone) }
-    var commune by remember { mutableStateOf(currentCommune) }
-    var village by remember { mutableStateOf(currentVillage) }
     var nomError by remember { mutableStateOf(false) }
     var telephoneError by remember { mutableStateOf(false) }
 
@@ -353,8 +324,8 @@ private fun EditProfileDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
-                    value = nom,
-                    onValueChange = { nom = it; nomError = false },
+                    value = nomPrenom,
+                    onValueChange = { nomPrenom = it; nomError = false },
                     label = { Text(stringResource(R.string.auth_name)) },
                     leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
                     isError = nomError,
@@ -379,33 +350,15 @@ private fun EditProfileDialog(
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
                 )
-                OutlinedTextField(
-                    value = commune,
-                    onValueChange = { commune = it },
-                    label = { Text(stringResource(R.string.auth_commune)) },
-                    leadingIcon = { Icon(Icons.Filled.LocationCity, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                OutlinedTextField(
-                    value = village,
-                    onValueChange = { village = it },
-                    label = { Text(stringResource(R.string.auth_village)) },
-                    leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
-                )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    nomError = nom.isBlank()
+                    nomError = nomPrenom.isBlank()
                     telephoneError = telephone.length < 8
                     if (!nomError && !telephoneError) {
-                        onSave(nom.trim(), telephone.trim(), commune.trim(), village.trim())
+                        onSave(nomPrenom.trim(), telephone.trim())
                     }
                 },
                 enabled = !isLoading,

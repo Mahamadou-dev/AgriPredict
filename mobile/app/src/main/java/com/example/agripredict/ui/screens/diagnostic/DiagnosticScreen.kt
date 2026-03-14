@@ -57,6 +57,8 @@ fun DiagnosticScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val matchedMaladie by viewModel.matchedMaladie.collectAsState()
+    val parcelles by viewModel.parcelles.collectAsState()
+    val selectedParcelleId by viewModel.selectedParcelleId.collectAsState()
 
     // === Permission caméra ===
     var hasCameraPermission by remember { mutableStateOf(false) }
@@ -150,6 +152,9 @@ fun DiagnosticScreen(
                             confidence = state.confidence,
                             isDemo = state.isDemo,
                             matchedMaladie = matchedMaladie,
+                            parcelles = parcelles,
+                            selectedParcelleId = selectedParcelleId,
+                            onParcelleSelected = { viewModel.selectParcelle(it) },
                             onSave = { viewModel.saveDiagnostic() },
                             onNewDiagnostic = { viewModel.reset() }
                         )
@@ -448,6 +453,7 @@ private fun AnalyzingContent() {
 /**
  * Résultat de l'analyse — Design riche avec traitements recommandés depuis la BDD.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ResultContent(
     bitmap: Bitmap,
@@ -457,6 +463,9 @@ private fun ResultContent(
     confidence: Float,
     isDemo: Boolean,
     matchedMaladie: Maladie?,
+    parcelles: List<com.example.agripredict.data.local.entity.ParcelleEntity>,
+    selectedParcelleId: String?,
+    onParcelleSelected: (String) -> Unit,
     onSave: () -> Unit,
     onNewDiagnostic: () -> Unit
 ) {
@@ -674,13 +683,123 @@ private fun ResultContent(
 
     Spacer(Modifier.height(24.dp))
 
-    // Bouton Sauvegarder
+    // === Sélecteur de parcelle (obligatoire pour sauvegarder) ===
+    if (parcelles.isEmpty()) {
+        // Pas de parcelle → message d'avertissement
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Warning, null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    stringResource(R.string.parcelle_required),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+    } else if (parcelles.size == 1) {
+        // Une seule parcelle → affichage info
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Terrain, null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    parcelles.first().nomParcelle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+    } else {
+        // Plusieurs parcelles → sélecteur dropdown
+        var expanded by remember { mutableStateOf(false) }
+        val selectedParcelle = parcelles.find { it.id == selectedParcelleId }
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = selectedParcelle?.nomParcelle ?: stringResource(R.string.parcelle_select),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.parcelle_select)) },
+                leadingIcon = { Icon(Icons.Filled.Terrain, null) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                shape = RoundedCornerShape(12.dp)
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                parcelles.forEach { parcelle ->
+                    DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(parcelle.nomParcelle, fontWeight = FontWeight.SemiBold)
+                                if (parcelle.commune.isNotEmpty() || parcelle.village.isNotEmpty()) {
+                                    Text(
+                                        listOfNotNull(
+                                            parcelle.village.ifEmpty { null },
+                                            parcelle.commune.ifEmpty { null }
+                                        ).joinToString(", "),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            onParcelleSelected(parcelle.id)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    Spacer(Modifier.height(16.dp))
+
+    // Bouton Sauvegarder (désactivé si pas de parcelle)
     Button(
         onClick = onSave,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        enabled = parcelles.isNotEmpty() && selectedParcelleId != null
     ) {
         Icon(Icons.Filled.Save, null, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(10.dp))

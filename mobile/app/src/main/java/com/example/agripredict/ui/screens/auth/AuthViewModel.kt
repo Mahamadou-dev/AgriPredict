@@ -64,7 +64,7 @@ class AuthViewModel(
                     val user = userDao.getById(userId)
                     if (user != null) {
                         _userProfile.value = user
-                        _authState.value = AuthUiState.LoggedIn(user.id, user.nom)
+                        _authState.value = AuthUiState.LoggedIn(user.id, user.nomPrenom)
                     } else {
                         // Session invalide → nettoyer
                         Log.w(TAG, "⚠️ Session invalide : utilisateur $userId introuvable en DB")
@@ -91,9 +91,10 @@ class AuthViewModel(
 
     /**
      * Inscrit un nouvel agriculteur.
-     * Le mot de passe par défaut est "123456".
+     * Ne demande que le nom, téléphone et mot de passe.
+     * Les parcelles seront ajoutées après l'inscription.
      */
-    fun register(nom: String, telephone: String, commune: String, village: String, password: String = "123456") {
+    fun register(nomPrenom: String, telephone: String, password: String = "123456") {
         viewModelScope.launch {
             _authState.value = AuthUiState.Loading
 
@@ -109,24 +110,21 @@ class AuthViewModel(
                 val userId = UUID.randomUUID().toString()
                 val user = UserEntity(
                     id = userId,
-                    nom = nom,
+                    nomPrenom = nomPrenom,
                     telephone = telephone,
-                    password = password,
-                    commune = commune,
-                    village = village,
-                    role = "agriculteur",
+                    motDePasseHash = password,
                     isActive = true,
-                    lastLogin = System.currentTimeMillis()
+                    createdAt = System.currentTimeMillis()
                 )
 
                 // Sauvegarder dans Room
                 userDao.insert(user)
 
                 // Sauvegarder la session
-                sessionPreferences.saveSession(userId, nom)
+                sessionPreferences.saveSession(userId, nomPrenom)
 
                 _userProfile.value = user
-                _authState.value = AuthUiState.LoggedIn(userId, nom)
+                _authState.value = AuthUiState.LoggedIn(userId, nomPrenom)
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur inscription : ${e.message}", e)
                 _authState.value = AuthUiState.Error("registration_failed")
@@ -153,20 +151,16 @@ class AuthViewModel(
                 }
 
                 // Vérifier le mot de passe
-                if (user.password != password) {
+                if (user.motDePasseHash != password) {
                     _authState.value = AuthUiState.Error("wrong_password")
                     return@launch
                 }
 
-                // Mettre à jour le dernier login
-                val updatedUser = user.copy(lastLogin = System.currentTimeMillis())
-                userDao.update(updatedUser)
-
                 // Sauvegarder la session
-                sessionPreferences.saveSession(user.id, user.nom)
+                sessionPreferences.saveSession(user.id, user.nomPrenom)
 
-                _userProfile.value = updatedUser
-                _authState.value = AuthUiState.LoggedIn(user.id, user.nom)
+                _userProfile.value = user
+                _authState.value = AuthUiState.LoggedIn(user.id, user.nomPrenom)
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur connexion : ${e.message}", e)
                 _authState.value = AuthUiState.Error("login_failed")
@@ -215,8 +209,9 @@ class AuthViewModel(
 
     /**
      * Met à jour les informations personnelles de l'utilisateur.
+     * Ne gère que le nom et le téléphone (les parcelles sont gérées séparément).
      */
-    fun updateProfile(nom: String, telephone: String, commune: String, village: String) {
+    fun updateProfile(nomPrenom: String, telephone: String) {
         viewModelScope.launch {
             _profileUpdateState.value = ProfileUpdateState.Loading
 
@@ -237,17 +232,15 @@ class AuthViewModel(
                 }
 
                 val updatedUser = currentUser.copy(
-                    nom = nom,
-                    telephone = telephone,
-                    commune = commune,
-                    village = village
+                    nomPrenom = nomPrenom,
+                    telephone = telephone
                 )
 
                 userDao.update(updatedUser)
-                sessionPreferences.saveSession(updatedUser.id, updatedUser.nom)
+                sessionPreferences.saveSession(updatedUser.id, updatedUser.nomPrenom)
 
                 _userProfile.value = updatedUser
-                _authState.value = AuthUiState.LoggedIn(updatedUser.id, updatedUser.nom)
+                _authState.value = AuthUiState.LoggedIn(updatedUser.id, updatedUser.nomPrenom)
                 _profileUpdateState.value = ProfileUpdateState.Success
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Erreur mise à jour profil : ${e.message}", e)
@@ -275,12 +268,12 @@ class AuthViewModel(
                 }
 
                 // Vérifier l'ancien mot de passe
-                if (user.password != currentPassword) {
+                if (user.motDePasseHash != currentPassword) {
                     _profileUpdateState.value = ProfileUpdateState.Error("wrong_current_password")
                     return@launch
                 }
 
-                val updatedUser = user.copy(password = newPassword)
+                val updatedUser = user.copy(motDePasseHash = newPassword)
                 userDao.update(updatedUser)
 
                 _userProfile.value = updatedUser

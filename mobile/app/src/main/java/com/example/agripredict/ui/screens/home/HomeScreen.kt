@@ -52,6 +52,7 @@ fun HomeScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToParcelles: () -> Unit = {},
     userName: String = ""
 ) {
     // Chaque carte a sa propre couleur d'accent pour un look moderne
@@ -62,6 +63,13 @@ fun HomeScreen(
             onClick = onNavigateToDiagnostic,
             iconTint = Color(0xFF2E7D32),
             bgColor = Color(0xFFE8F5E9)
+        ),
+        HomeMenuItem(
+            titleRes = R.string.home_manage_parcelles,
+            icon = Icons.Filled.Terrain,
+            onClick = onNavigateToParcelles,
+            iconTint = Color(0xFF33691E),
+            bgColor = Color(0xFFF1F8E9)
         ),
         HomeMenuItem(
             titleRes = R.string.home_learn_diseases,

@@ -13,6 +13,7 @@ data class DiagnosticUploadDTO(
     val id: String,
     val userId: String,
     val date: Long,
+    val parcelleId: String? = null,
     val location: LocationUploadDTO? = null,
     val prediction: PredictionUploadDTO? = null
 )
