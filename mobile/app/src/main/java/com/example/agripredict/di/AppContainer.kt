@@ -118,7 +118,8 @@ class AppContainer(private val context: Context) {
         HistoryViewModel.Factory(
             repository = diagnosticRepository,
             sessionPreferences = sessionPreferences,
-            maladieRepository = maladieRepository
+            maladieRepository = maladieRepository,
+            parcelleDao = parcelleDao
         )
     }
 
@@ -160,4 +161,3 @@ class AppContainer(private val context: Context) {
         }
     }
 }
-

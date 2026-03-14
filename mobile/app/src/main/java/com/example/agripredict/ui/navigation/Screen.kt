@@ -46,10 +46,15 @@ sealed class Screen(val route: String) {
     /** Écran d'ajout d'une parcelle */
     data object AddParcelle : Screen("add_parcelle")
 
+    /** Écran d'édition d'une parcelle */
+    data object EditParcelle : Screen("edit_parcelle/{parcelleId}") {
+        /** Crée la route avec l'ID de la parcelle */
+        fun createRoute(parcelleId: String) = "edit_parcelle/$parcelleId"
+    }
+
     /** Écran de détail d'un diagnostic */
     data object HistoryDetail : Screen("history_detail/{diagnosticId}") {
         /** Crée la route avec l'ID du diagnostic */
         fun createRoute(diagnosticId: String) = "history_detail/$diagnosticId"
     }
 }
-

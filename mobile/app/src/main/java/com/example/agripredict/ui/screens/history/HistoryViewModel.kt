@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.agripredict.data.local.dao.ParcelleDao
+import com.example.agripredict.data.local.entity.ParcelleEntity
 import com.example.agripredict.data.preferences.SessionPreferences
 import com.example.agripredict.domain.model.DiagnosticResult
 import com.example.agripredict.domain.model.Maladie
@@ -24,7 +26,8 @@ import kotlinx.coroutines.launch
 class HistoryViewModel(
     private val repository: DiagnosticRepository,
     private val sessionPreferences: SessionPreferences,
-    private val maladieRepository: MaladieRepository
+    private val maladieRepository: MaladieRepository,
+    private val parcelleDao: ParcelleDao
 ) : ViewModel() {
 
     companion object {
@@ -46,6 +49,10 @@ class HistoryViewModel(
     /** Maladie correspondante au diagnostic sélectionné */
     private val _selectedMaladie = MutableStateFlow<Maladie?>(null)
     val selectedMaladie: StateFlow<Maladie?> = _selectedMaladie.asStateFlow()
+
+    /** Parcelle liée au diagnostic sélectionné */
+    private val _selectedParcelle = MutableStateFlow<ParcelleEntity?>(null)
+    val selectedParcelle: StateFlow<ParcelleEntity?> = _selectedParcelle.asStateFlow()
 
     init {
         loadDiagnostics()
@@ -105,6 +112,7 @@ class HistoryViewModel(
             try {
                 val diagnostic = repository.getDiagnosticById(diagnosticId)
                 _selectedDiagnostic.value = diagnostic
+                _selectedParcelle.value = null
 
                 // Rechercher la maladie correspondante dans la BDD
                 if (diagnostic != null) {
@@ -114,6 +122,12 @@ class HistoryViewModel(
                     } catch (e: Exception) {
                         Log.e(TAG, "❌ Erreur recherche maladie : ${e.message}")
                         _selectedMaladie.value = null
+                    }
+
+                    // Charger les infos minimales de la parcelle du diagnostic
+                    val parcelleId = diagnostic.parcelleId
+                    if (!parcelleId.isNullOrBlank()) {
+                        _selectedParcelle.value = parcelleDao.getById(parcelleId)
                     }
                 }
             } catch (e: Exception) {
@@ -138,11 +152,12 @@ class HistoryViewModel(
     class Factory(
         private val repository: DiagnosticRepository,
         private val sessionPreferences: SessionPreferences,
-        private val maladieRepository: MaladieRepository
+        private val maladieRepository: MaladieRepository,
+        private val parcelleDao: ParcelleDao
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return HistoryViewModel(repository, sessionPreferences, maladieRepository) as T
+            return HistoryViewModel(repository, sessionPreferences, maladieRepository, parcelleDao) as T
         }
     }
 }

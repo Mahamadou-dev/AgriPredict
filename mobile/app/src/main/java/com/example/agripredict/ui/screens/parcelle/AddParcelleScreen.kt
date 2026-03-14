@@ -39,7 +39,8 @@ fun AddParcelleScreen(
     onNavigateBack: () -> Unit,
     onParcelleSaved: () -> Unit,
     showSkipButton: Boolean = false,
-    onSkip: () -> Unit = {}
+    onSkip: () -> Unit = {},
+    parcelleId: String? = null
 ) {
     var nomParcelle by remember { mutableStateOf("") }
     var commune by remember { mutableStateOf("") }
@@ -47,6 +48,30 @@ fun AddParcelleScreen(
     var ville by remember { mutableStateOf("") }
     var nomError by remember { mutableStateOf(false) }
     var saved by remember { mutableStateOf(false) }
+    var initializedForEdit by remember(parcelleId) { mutableStateOf(false) }
+
+    val editingParcelle by viewModel.editingParcelle.collectAsState()
+    val isEditMode = !parcelleId.isNullOrBlank()
+
+    LaunchedEffect(parcelleId) {
+        if (isEditMode) {
+            parcelleId?.let { viewModel.loadParcelleForEdit(it) }
+        } else {
+            viewModel.clearEditingParcelle()
+        }
+    }
+
+    LaunchedEffect(editingParcelle, isEditMode, initializedForEdit) {
+        if (isEditMode && !initializedForEdit) {
+            editingParcelle?.let { parcelle ->
+                nomParcelle = parcelle.nomParcelle
+                commune = parcelle.commune
+                village = parcelle.village
+                ville = parcelle.ville
+                initializedForEdit = true
+            }
+        }
+    }
 
     // Naviguer si sauvegardé
     LaunchedEffect(saved) {
@@ -57,7 +82,12 @@ fun AddParcelleScreen(
         topBar = {
             if (!showSkipButton) {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.parcelle_add)) },
+                    title = {
+                        Text(
+                            if (isEditMode) stringResource(R.string.parcelle_title)
+                            else stringResource(R.string.parcelle_add)
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
@@ -106,7 +136,8 @@ fun AddParcelleScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = stringResource(R.string.parcelle_add_title),
+                        text = if (isEditMode) stringResource(R.string.parcelle_title)
+                        else stringResource(R.string.parcelle_add_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -192,13 +223,28 @@ fun AddParcelleScreen(
                 onClick = {
                     nomError = nomParcelle.isBlank()
                     if (!nomError) {
-                        viewModel.addParcelle(
-                            nomParcelle = nomParcelle.trim(),
-                            commune = commune.trim(),
-                            village = village.trim(),
-                            ville = ville.trim()
-                        )
-                        saved = true
+                        if (isEditMode) {
+                            val existing = editingParcelle
+                            if (existing != null) {
+                                viewModel.updateParcelle(
+                                    existing.copy(
+                                        nomParcelle = nomParcelle.trim(),
+                                        commune = commune.trim(),
+                                        village = village.trim(),
+                                        ville = ville.trim()
+                                    )
+                                )
+                                saved = true
+                            }
+                        } else {
+                            viewModel.addParcelle(
+                                nomParcelle = nomParcelle.trim(),
+                                commune = commune.trim(),
+                                village = village.trim(),
+                                ville = ville.trim()
+                            )
+                            saved = true
+                        }
                     }
                 },
                 modifier = Modifier
@@ -210,14 +256,15 @@ fun AddParcelleScreen(
                 Icon(Icons.Filled.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.parcelle_save),
+                    text = if (isEditMode) stringResource(R.string.save)
+                    else stringResource(R.string.parcelle_save),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
             // === Bouton "Plus tard" (seulement après inscription) ===
-            if (showSkipButton) {
+            if (showSkipButton && !isEditMode) {
                 Spacer(modifier = Modifier.height(12.dp))
                 TextButton(
                     onClick = onSkip,
@@ -235,4 +282,3 @@ fun AddParcelleScreen(
         }
     }
 }
-

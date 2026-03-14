@@ -32,7 +32,8 @@ import com.example.agripredict.data.local.entity.ParcelleEntity
 fun ParcelleScreen(
     viewModel: ParcelleViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToAdd: () -> Unit
+    onNavigateToAdd: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var parcelleToDelete by remember { mutableStateOf<ParcelleEntity?>(null) }
@@ -157,6 +158,7 @@ fun ParcelleScreen(
                     items(state.parcelles, key = { it.id }) { parcelle ->
                         ParcelleCard(
                             parcelle = parcelle,
+                            onEdit = { onNavigateToEdit(parcelle.id) },
                             onDelete = { parcelleToDelete = parcelle }
                         )
                     }
@@ -182,11 +184,12 @@ fun ParcelleScreen(
 }
 
 /**
- * Carte affichant une parcelle avec ses informations et un bouton supprimer.
+ * Carte affichant une parcelle avec ses informations et actions.
  */
 @Composable
 private fun ParcelleCard(
     parcelle: ParcelleEntity,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -238,6 +241,15 @@ private fun ParcelleCard(
                 }
             }
 
+            // Bouton modifier
+            IconButton(onClick = onEdit) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.profile_edit),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
             // Bouton supprimer
             IconButton(onClick = onDelete) {
                 Icon(
@@ -249,4 +261,3 @@ private fun ParcelleCard(
         }
     }
 }
-

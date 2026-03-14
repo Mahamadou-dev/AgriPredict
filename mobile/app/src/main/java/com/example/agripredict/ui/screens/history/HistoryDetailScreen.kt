@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -27,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.agripredict.R
+import com.example.agripredict.data.local.entity.ParcelleEntity
 import com.example.agripredict.domain.model.DiagnosticResult
 import com.example.agripredict.domain.model.Maladie
 import com.example.agripredict.sync.SyncStatus
@@ -53,6 +52,7 @@ fun HistoryDetailScreen(
 ) {
     val diagnostic by viewModel.selectedDiagnostic.collectAsState()
     val maladie by viewModel.selectedMaladie.collectAsState()
+    val parcelle by viewModel.selectedParcelle.collectAsState()
 
     LaunchedEffect(diagnosticId) {
         viewModel.loadDiagnosticById(diagnosticId)
@@ -92,6 +92,7 @@ fun HistoryDetailScreen(
             HistoryDetailContent(
                 diagnostic = diag,
                 maladie = maladie,
+                parcelle = parcelle,
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -102,6 +103,7 @@ fun HistoryDetailScreen(
 private fun HistoryDetailContent(
     diagnostic: DiagnosticResult,
     maladie: Maladie?,
+    parcelle: ParcelleEntity?,
     modifier: Modifier = Modifier
 ) {
     val formatted = LabelFormatter.format(diagnostic.label)
@@ -324,6 +326,32 @@ private fun HistoryDetailContent(
                         label = stringResource(R.string.history_date),
                         value = dateStr
                     )
+
+                    // Infos minimales de parcelle si disponibles
+                    parcelle?.let {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                        DetailInfoRow(
+                            icon = Icons.Filled.Terrain,
+                            label = stringResource(R.string.parcelle_title),
+                            value = it.nomParcelle
+                        )
+
+                        val location = listOfNotNull(
+                            it.village.ifEmpty { null },
+                            it.commune.ifEmpty { null },
+                            it.ville.ifEmpty { null }
+                        ).joinToString(", ")
+
+                        if (location.isNotBlank()) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                            DetailInfoRow(
+                                icon = Icons.Filled.LocationOn,
+                                label = stringResource(R.string.home_subtitle),
+                                value = location
+                            )
+                        }
+                    }
+
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
                     DetailInfoRow(

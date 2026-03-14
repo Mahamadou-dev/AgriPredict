@@ -38,6 +38,10 @@ class ParcelleViewModel(
     private val _uiState = MutableStateFlow<ParcelleUiState>(ParcelleUiState.Loading)
     val uiState: StateFlow<ParcelleUiState> = _uiState.asStateFlow()
 
+    /** Parcelle actuellement chargée pour édition */
+    private val _editingParcelle = MutableStateFlow<ParcelleEntity?>(null)
+    val editingParcelle: StateFlow<ParcelleEntity?> = _editingParcelle.asStateFlow()
+
     init {
         loadParcelles()
     }
@@ -122,6 +126,23 @@ class ParcelleViewModel(
         }
     }
 
+    /** Charge une parcelle par ID pour alimenter le formulaire d'édition. */
+    fun loadParcelleForEdit(parcelleId: String) {
+        viewModelScope.launch {
+            try {
+                _editingParcelle.value = parcelleDao.getById(parcelleId)
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Erreur chargement parcelle $parcelleId : ${e.message}", e)
+                _editingParcelle.value = null
+            }
+        }
+    }
+
+    /** Efface la parcelle en cours d'édition (retour au mode ajout). */
+    fun clearEditingParcelle() {
+        _editingParcelle.value = null
+    }
+
     // === Factory ===
 
     class Factory(
@@ -148,4 +169,3 @@ sealed class ParcelleUiState {
     data class Success(val parcelles: List<ParcelleEntity>) : ParcelleUiState()
     data class Error(val message: String) : ParcelleUiState()
 }
-

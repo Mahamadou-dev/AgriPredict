@@ -200,7 +200,10 @@ fun AgriPredictNavGraph(navController: NavHostController) {
                     ParcelleScreen(
                         viewModel = parcelleViewModel,
                         onNavigateBack = { navController.popBackStack() },
-                        onNavigateToAdd = { navController.navigate(Screen.AddParcelle.route) }
+                        onNavigateToAdd = { navController.navigate(Screen.AddParcelle.route) },
+                        onNavigateToEdit = { parcelleId ->
+                            navController.navigate(Screen.EditParcelle.createRoute(parcelleId))
+                        }
                     )
                 }
 
@@ -228,7 +231,25 @@ fun AgriPredictNavGraph(navController: NavHostController) {
                             navController.navigate(Screen.Home.route) {
                                 popUpTo(Screen.AddParcelle.route) { inclusive = true }
                             }
-                        }
+                        },
+                        parcelleId = null
+                    )
+                }
+
+                // Édition d'une parcelle existante
+                composable(
+                    route = Screen.EditParcelle.route,
+                    arguments = listOf(navArgument("parcelleId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val parcelleId = backStackEntry.arguments?.getString("parcelleId") ?: ""
+                    val parcelleViewModel: ParcelleViewModel = viewModel(
+                        factory = appContainer.parcelleViewModelFactory
+                    )
+                    AddParcelleScreen(
+                        viewModel = parcelleViewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onParcelleSaved = { navController.popBackStack() },
+                        parcelleId = parcelleId
                     )
                 }
 
